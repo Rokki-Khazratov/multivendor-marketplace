@@ -1,22 +1,22 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-class CustomUser(AbstractUser):
-    USER_TYPE_CHOICES = (
-        ('buyer', 'Buyer'),
-        ('seller', 'Seller'),
-        ('staff', 'Staff'),
-    )
-    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='buyer')
+# class CustomUser(AbstractUser):
+#     USER_TYPE_CHOICES = (
+#         ('buyer', 'Buyer'),
+#         ('seller', 'Seller'),
+#         ('staff', 'Staff'),
+#     )
+#     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='buyer')
 
-    def is_buyer(self):
-        return self.user_type == 'buyer'
+#     def is_buyer(self):
+#         return self.user_type == 'buyer'
 
-    def is_seller(self):
-        return self.user_type == 'seller'
+#     def is_seller(self):
+#         return self.user_type == 'seller'
 
-    def is_staff(self):
-        return self.user_type == 'staff'
+#     def is_staff(self):
+#         return self.user_type == 'staff'
 
 
 class Category(models.Model):
@@ -26,9 +26,11 @@ class Category(models.Model):
         return self.name
 
 
+
+
 #! Product's things ----------------------------
 class Product(models.Model):
-    seller = models.ForeignKey(CustomCustomUser, on_delete=models.CASCADE)
+    # seller = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -71,23 +73,25 @@ class ProductCharacteristic(models.Model):
 
 class Review(models.Model):
     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    # user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     rating = models.PositiveIntegerField()
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
 class CartItem(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    # user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
 
 #! ----------------------------
 
 
+ 
+
 
 
 class Order(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    # user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     products = models.ManyToManyField(Product, through='OrderItem')
     created_at = models.DateTimeField(auto_now_add=True)
 
