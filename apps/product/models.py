@@ -1,35 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-
-# class CustomUser(AbstractUser):
-#     USER_TYPE_CHOICES = (
-#         ('buyer', 'Buyer'),
-#         ('seller', 'Seller'),
-#         ('staff', 'Staff'),
-#     )
-#     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='buyer')
-
-#     def is_buyer(self):
-#         return self.user_type == 'buyer'
-
-#     def is_seller(self):
-#         return self.user_type == 'seller'
-
-#     def is_staff(self):
-#         return self.user_type == 'staff'
-
-
-
-class Seller(models.Model):
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
-    email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.name
 
 
 class Category(models.Model):

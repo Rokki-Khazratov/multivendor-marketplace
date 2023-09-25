@@ -67,6 +67,3 @@ class SellerListCreateView(ListCreateAPIView):
 class SellerRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Seller.objects.all()
     serializer_class = SellerSerializer
-
-
-
