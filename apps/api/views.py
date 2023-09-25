@@ -1,7 +1,35 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from .models import *
-from .serializers import *
 from rest_framework import filters
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_jwt.settings import api_settings
+from rest_framework.response import Response
+from .models import *
+from apps.product.models import Cart,CartItem
+from .serializers import *
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import authenticate, login
+from rest_framework.views import APIView
+
+
+class LoginView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+            jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+            payload = jwt_payload_handler(user)
+            token = jwt_encode_handler(payload)
+            return Response({'token': token})
+        else:
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+
 
 class ProductListCreateView(ListCreateAPIView):
     queryset = Product.objects.all()
@@ -50,6 +78,39 @@ class ProductListCreateView(ListCreateAPIView):
 class ProductRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_to_cart(request):
+    product_id = request.data.get('product_id')
+    quantity = request.data.get('quantity', 1)
+
+
+    product = get_object_or_404(Product, pk=product_id)
+
+    cart, created = Cart.objects.get_or_create(user=request.user)
+
+    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+    cart_item.quantity += quantity
+    cart_item.save()
+
+    return Response({'message': 'Product added to cart successfully'}, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class CategoryListCreateView(ListCreateAPIView):
     queryset = Category.objects.all()
