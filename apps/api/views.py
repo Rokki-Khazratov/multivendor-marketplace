@@ -5,12 +5,31 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.settings import api_settings
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from .models import *
 from apps.product.models import Cart,CartItem
 from .serializers import *
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login
-from rest_framework.views import APIView
+
+
+
+class LogoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        request.auth.delete()
+        return Response(status=status.HTTP_200_OK)
+
+
+class RegisterView(generics.CreateAPIView):
+    serializer_class = UserSerializer  
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+        user.set_password(serializer.validated_data['password'])
+        user.save()
+        return user
 
 
 class LoginView(APIView):
