@@ -1,4 +1,4 @@
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView,CreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import filters
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -22,7 +22,7 @@ class LogoutView(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class RegisterView(generics.CreateAPIView):
+class RegisterView(CreateAPIView):
     serializer_class = UserSerializer  
 
     def perform_create(self, serializer):
