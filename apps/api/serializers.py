@@ -41,7 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
         if User.objects.filter(username=username).exists():
             raise ValidationError('Пользователь с таким именем уже существует.')
 
-        if len(password) <= 8:
+        if len(password) < 8:
             raise ValidationError('Пароль должен содержать более 8 символов.')
 
 
