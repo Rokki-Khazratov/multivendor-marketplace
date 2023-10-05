@@ -7,6 +7,7 @@ class SellerApplicationCreateView(generics.CreateAPIView):
     queryset = SellerApplication.objects.all()
     serializer_class = SellerApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
+     
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user, status='pending')
