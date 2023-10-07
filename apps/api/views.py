@@ -102,20 +102,61 @@ class ProductRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def add_to_cart(request):
-    product_id = request.data.get('product_id')
+def add_to_cart(request, pk):
     quantity = request.data.get('quantity', 1)
-
-
-    product = get_object_or_404(Product, pk=product_id)
-
     cart, created = Cart.objects.get_or_create(user=request.user)
+    
+    try:
+        product = Product.objects.get(pk=pk)
+    except Product.DoesNotExist:
+        return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if product.quantity < quantity:
+        return Response({'error': 'Not enough quantity in stock'}, status=status.HTTP_400_BAD_REQUEST)
 
     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
     cart_item.quantity += quantity
+    product.quantity -= quantity
     cart_item.save()
+    product.save()
 
     return Response({'message': 'Product added to cart successfully'}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def remove_from_cart(request, pk):
+    try:
+        # Find the cart associated with the authenticated user
+        cart = Cart.objects.get(user=request.user)
+
+        # Find the cart item to remove based on the product's primary key
+        cart_item = CartItem.objects.get(cart=cart, product__pk=pk)
+
+        # Reduce the cart item's quantity by 1 (you can adjust the logic here)
+        cart_item.quantity -= 1
+
+        # Ensure the quantity doesn't go below zero
+        if cart_item.quantity < 0:
+            cart_item.quantity = 0
+
+        # Save the cart item
+        cart_item.save()
+
+        # Optionally, you can also remove the cart item completely if its quantity reaches zero
+        if cart_item.quantity == 0:
+            cart_item.delete()
+
+        return Response({'message': 'Product removed from cart successfully'}, status=status.HTTP_200_OK)
+
+    except Cart.DoesNotExist:
+        return Response({'error': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    except CartItem.DoesNotExist:
+        return Response({'error': 'Product not found in cart'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
 
 
 
