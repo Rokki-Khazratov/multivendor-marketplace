@@ -1,6 +1,7 @@
 from django.db import models
 from apps.seller.models import Seller
 from django.contrib.auth.models import User
+from django.db.models import F, Sum
 
 
 class Category(models.Model):
@@ -14,6 +15,11 @@ class Cart(models.Model):
     items = models.ManyToManyField('Product', through='CartItem')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def total_price(self):
+        total = self.items.aggregate(total_price=Sum(F('items__quantity') * F('items__product__price')))['total_price']
+        return total if total is not None else 0
 
     def __str__(self):
         return f"Cart for {self.user.username}"
@@ -31,6 +37,7 @@ class Product(models.Model):
     description = models.TextField()
     handle = models.SlugField(unique=True)  # slug
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    discount_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField()
 
     created_at = models.DateTimeField(auto_now_add=True)
