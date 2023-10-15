@@ -1,4 +1,4 @@
-from rest_framework.generics import ListCreateAPIView,CreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView,CreateAPIView, RetrieveUpdateDestroyAPIView,ListAPIView
 from rest_framework import filters
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -12,6 +12,12 @@ from .serializers import *
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login
 
+
+class DocumentationSectionList(ListAPIView):
+    serializer_class = DocumentationSectionSerializer
+
+    def get_queryset(self):
+        return DocumentationSection.objects.filter(parent_section__isnull=True)
 
 
 class LogoutView(APIView):

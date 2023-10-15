@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from apps.product.models import Category,Product
 from apps.seller.models import Seller,SellerApplication
+from .models import DocumentationSection
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 
@@ -24,6 +25,13 @@ class SellerApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = SellerApplication
         fields = '__all__'
+
+
+class DocumentationSectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DocumentationSection
+        fields = '__all__'
+
 
 
 class UserSerializer(serializers.ModelSerializer):

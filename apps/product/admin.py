@@ -21,7 +21,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Seller)
 class SellerAdmin(admin.ModelAdmin):
-    list_display = ['name','id', 'email', 'phone_number']
+    list_display = ['store_name','id', 'phone_number']
     # list_filter = ['category']
     search_fields = ['name', 'phone_number']
     # exclude = ['handle']
