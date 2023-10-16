@@ -6,7 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure--z2p=&yhm5+xy13-%qupu%$h7v1okcrv3^wql4_&r%368bakx$'
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app']
+
 
 
 INSTALLED_APPS = [
@@ -115,6 +116,9 @@ USE_I18N = True
 USE_TZ = True
 
 APPEND_SLASH = False
+
+WSGI_APPLICATION = 'vercel_app.wsgi.app'
+
 
 
 
