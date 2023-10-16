@@ -89,15 +89,6 @@ class ProductListCreateView(ListCreateAPIView):
             min_price, max_price = quantity_range.split('-')
             queryset = queryset.filter(price__gte=min_price, price__lte=max_price)
 
-        # Filtering by in the cart or not
-        # in_cart = self.request.query_params.get('in_cart')
-        # if in_cart:
-        #     user = self.request.user  # Assuming you have authentication
-        #     if in_cart == 'true':
-        #         queryset = queryset.filter(cartitem__user=user)
-        #     else:
-        #         queryset = queryset.exclude(cartitem__user=user)
-
         return queryset
 
 class ProductRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
@@ -178,9 +169,17 @@ def remove_from_cart(request, pk):
 
 
 
+
 class CategoryListCreateView(ListCreateAPIView):
-    queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    filter_backends = [filters.OrderingFilter]
+
+    def get_queryset(self):
+        queryset = Category.objects.all()  # Use .all() to avoid caching
+        name = self.request.query_params.get('name')
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+        return queryset    
 
 class CategoryRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
