@@ -21,6 +21,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField()
+    characteristics = models.ManyToManyField(ProductCharacteristic)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -75,6 +76,11 @@ class ProductCharacteristic(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
+    quantity = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.product.name} - {self.name}: {self.value}"
+
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
@@ -84,3 +90,44 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"Cart Item for Cart {self.cart.id}"
+
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    shipping_address = models.TextField()
+    order_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Order by {self.user.username}"
+
+    @staticmethod
+    def create_order_from_cart(cart, shipping_address):
+        order = Order.objects.create(user=cart.user, cart=cart, shipping_address=shipping_address)
+        
+        for cart_item in cart.cartitem_set.all():
+            order_item = OrderItem(
+                order=order,
+                product=cart_item.product,
+                quantity=cart_item.quantity
+            )
+            order_item.save()
+        
+        return order
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    product = models.ForeignKey('Product', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    characteristics = models.ManyToManyField(ProductCharacteristic)
+
+    def get_total_price(self):
+        return self.product.price * self.quantity
+
+    def __str__(self):
+        return f"Order Item for Order {self.order.id}"
+
+
+
+
+
