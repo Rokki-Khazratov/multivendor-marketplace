@@ -185,11 +185,10 @@ class CategoryRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
+class UserListCreateView(ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
-class SellerListCreateView(ListCreateAPIView):
-    queryset = Seller.objects.all()
-    serializer_class = SellerSerializer
-
-class SellerRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
-    queryset = Seller.objects.all()
-    serializer_class = SellerSerializer
+class UserRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer

@@ -10,24 +10,6 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-class Cart(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    items = models.ManyToManyField('Product', through='CartItem')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    @property
-    def total_price(self):
-        total = self.items.aggregate(total_price=Sum(F('items__quantity') * F('items__product__price')))['total_price']
-        return total if total is not None else 0
-
-    def __str__(self):
-        return f"Cart for {self.user.username}"
-
-class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    product = models.ForeignKey('Product', on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
 
 #! Product's things ----------------------------
 class Product(models.Model):
@@ -68,13 +50,37 @@ class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='product_images/')
 
-class ProductCharacteristic(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    value = models.CharField(max_length=255)
 
 class Review(models.Model):
     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
     rating = models.PositiveIntegerField()
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+class Cart(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    items = models.ManyToManyField('Product', through='CartItem')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def total_price(self):
+        total = self.items.aggregate(total_price=Sum(F('items__quantity') * F('items__product__price')))['total_price']
+        return total if total is not None else 0
+
+    def __str__(self):
+        return f"Cart for {self.user.username}"
+    
+class ProductCharacteristic(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    value = models.CharField(max_length=255)
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    product = models.ForeignKey('Product', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    characteristics = models.ManyToManyField(ProductCharacteristic)
+
+    def __str__(self):
+        return f"Cart Item for Cart {self.cart.id}"
