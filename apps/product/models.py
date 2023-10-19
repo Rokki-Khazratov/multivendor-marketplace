@@ -10,6 +10,14 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    
+class ProductCharacteristic(models.Model):
+    name = models.CharField(max_length=255)
+    value = models.CharField(max_length=255)
+    quantity = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.name}: {self.value} - {self.quantity}"
 
 #! Product's things ----------------------------
 class Product(models.Model):
@@ -17,7 +25,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255)
     description = models.TextField()
-    handle = models.SlugField(unique=True)  # slug
+    handle = models.SlugField(unique=True) 
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField()
@@ -30,22 +38,12 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-    # def add_to_cart(self, user):
-    #     cart_item, created = CartItem.objects.get_or_create(cart=user.cart, product=self)
-    #     if not created:
-    #         cart_item.quantity += 1
-    #         cart_item.save()
+    def save(self, *args, **kwargs):
+        # Calculate the total quantity based on characteristics
+        total_quantity = sum(characteristic.quantity for characteristic in self.characteristics.all())
+        self.quantity = total_quantity
 
-    # def remove_from_cart(self, user):
-    #     try:
-    #         cart_item = CartItem.objects.get(cart=user.cart, product=self)
-    #         if cart_item.quantity > 1:
-    #             cart_item.quantity -= 1
-    #             cart_item.save()
-    #         else:
-    #             cart_item.delete()
-    #     except CartItem.DoesNotExist:
-    #         pass
+        super(Product, self).save(*args, **kwargs)
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
@@ -71,15 +69,6 @@ class Cart(models.Model):
 
     def __str__(self):
         return f"Cart for {self.user.username}"
-    
-class ProductCharacteristic(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    value = models.CharField(max_length=255)
-    quantity = models.PositiveIntegerField(default=0)
-
-    def __str__(self):
-        return f"{self.product.name} - {self.name}: {self.value}"
 
 
 class CartItem(models.Model):
@@ -115,7 +104,7 @@ class Order(models.Model):
         
         return order
 
-class OrderItem(models.Model):
+class OrderItem(models.Model) :
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey('Product', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()

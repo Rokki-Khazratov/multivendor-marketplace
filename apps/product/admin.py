@@ -18,6 +18,13 @@ class ProductAdmin(admin.ModelAdmin):
     class Meta:
         model = Product
 
+@admin.register(ProductCharacteristic)
+class ProductCharacteristicAdmin(admin.ModelAdmin):
+    list_display = ['name','id','value','quantity']
+
+    class Meta:
+        model = ProductCharacteristic
+
 
 @admin.register(Seller)
 class SellerAdmin(admin.ModelAdmin):
