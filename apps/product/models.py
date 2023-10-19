@@ -108,7 +108,7 @@ class Order(models.Model):
         
         return order
 
-class OrderItem(models.Model) :
+class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey('Product', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
@@ -117,8 +117,13 @@ class OrderItem(models.Model) :
     def get_total_price(self):
         return self.product.price * self.quantity
 
+    @property
+    def total_characteristics_quantity(self):
+        return sum(characteristic.quantity for characteristic in self.characteristics.all())
+
     def __str__(self):
         return f"Order Item for Order {self.order.id}"
+
 
 
 
