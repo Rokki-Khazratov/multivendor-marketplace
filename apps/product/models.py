@@ -18,6 +18,7 @@ class ProductCharacteristic(models.Model):
 
     def __str__(self):
         return f"{self.name}: {self.value} - {self.quantity}"
+        
 
 #! Product's things ----------------------------
 class Product(models.Model):
@@ -28,7 +29,6 @@ class Product(models.Model):
     handle = models.SlugField(unique=True) 
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_price = models.DecimalField(max_digits=10, decimal_places=2)
-    quantity = models.PositiveIntegerField()
     characteristics = models.ManyToManyField(ProductCharacteristic)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -38,12 +38,6 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
-        # Calculate the total quantity based on characteristics
-        total_quantity = sum(characteristic.quantity for characteristic in self.characteristics.all())
-        self.quantity = total_quantity
-
-        super(Product, self).save(*args, **kwargs)
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
@@ -57,32 +51,67 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+
+
+
+
+
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    items = models.ManyToManyField('Product', through='CartItem')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
     @property
     def total_price(self):
-        total = self.items.aggregate(total_price=Sum(F('cartitem__quantity') * F('cartitem__product__price')))['total_price']
-        return total if total is not None else 0
+        total = 0
+        for cart_item in self.cartitem_set.all():
+            product_price = cart_item.product.price
+            quantity = cart_item.quantity
+
+            # Учтите характеристики
+            for characteristic in cart_item.characteristics.all():
+                product_price += characteristic.price  # Предположим, что у характеристики есть поле "price"
+            
+            total += product_price * quantity
+        
+        return total
 
     def __str__(self):
-        return f"Cart for {self.user.username}"
+        return f"{self.user.username}'s cart"
+
+
+
+
+
+class CharacteristicQuantity(models.Model):
+    cart_item = models.ForeignKey('CartItem', on_delete=models.CASCADE)
+    characteristic = models.ForeignKey(ProductCharacteristic, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=0)
+    
+    def __str__(self):
+        return f"{self.cart_item} - {self.characteristic.name} : {self.quantity}"
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    product = models.ForeignKey('Product', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
-    characteristics = models.ManyToManyField(ProductCharacteristic)
-
-    @property
-    def total_quantity(self):
-        return sum(characteristic.quantity for characteristic in self.characteristics.all())
+    characteristic_quantity = models.ForeignKey(CharacteristicQuantity, null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Cart Item for Cart {self.cart.id}"
+        return f"Cart Item for Cart {self.cart.id}"   
+    
+
+    
+
+    
+
+
+
+
+
+
+
 
 
 class Order(models.Model):
