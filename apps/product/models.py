@@ -56,6 +56,7 @@ class Review(models.Model):
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
+
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     items = models.ManyToManyField('Product', through='CartItem')
@@ -64,18 +65,21 @@ class Cart(models.Model):
 
     @property
     def total_price(self):
-        total = self.items.aggregate(total_price=Sum(F('items__quantity') * F('items__product__price')))['total_price']
+        total = self.items.aggregate(total_price=Sum(F('cartitem__quantity') * F('cartitem__product__price')))['total_price']
         return total if total is not None else 0
 
     def __str__(self):
         return f"Cart for {self.user.username}"
-
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product = models.ForeignKey('Product', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     characteristics = models.ManyToManyField(ProductCharacteristic)
+
+    @property
+    def total_quantity(self):
+        return sum(characteristic.quantity for characteristic in self.characteristics.all())
 
     def __str__(self):
         return f"Cart Item for Cart {self.cart.id}"
