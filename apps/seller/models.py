@@ -20,6 +20,12 @@ class SellerApplication(models.Model):
     store_name = models.CharField(max_length=255) 
     address = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15)
+    status_changed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username}:{self.store_name}"
+
+    def save(self, *args, **kwargs):
+        if self.status == 'approved' or self.status == 'rejected':
+            self.status_changed = True
+        super(SellerApplication, self).save(*args, **kwargs)

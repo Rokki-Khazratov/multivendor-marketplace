@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.product.models import Category,Product
+from apps.product.models import Category,Product,ProductCharacteristic
 from apps.seller.models import Seller,SellerApplication
 from .models import DocumentationSection
 from django.contrib.auth.models import User
@@ -10,6 +10,12 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+
+class ProductCharacteristicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductCharacteristic
+        fields = '__all__'
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

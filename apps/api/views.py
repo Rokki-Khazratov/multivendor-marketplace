@@ -89,6 +89,18 @@ class ProductRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
+class ProductCharacteristicList(ListCreateAPIView):
+    serializer_class = ProductCharacteristicSerializer
+
+    def get_queryset(self):
+        product_id = self.request.query_params.get('product_id')
+        if product_id:
+            # Filter characteristics by the specified product
+            return ProductCharacteristic.objects.filter(product=product_id)
+        else:
+            # If no product_id is provided, return all characteristics
+            return ProductCharacteristic.objects.all()
+
 
 
 
