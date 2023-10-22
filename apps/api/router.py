@@ -1,7 +1,10 @@
 from django.urls import path
-from .views import *
-from apps.seller.views import *
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
+
+from apps.api.views import *
+from apps.seller.views import *
+from apps.user.views import *
+from apps.product.views import *
 
 urlpatterns = [
     

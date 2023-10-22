@@ -17,12 +17,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'rest_framework',
     'corsheaders',
-    'apps.api',
     
+    'apps.api',
     'apps.product',
+    'apps.user',
     'apps.seller',
+    'apps.order',
 ]
 
 REST_FRAMEWORK = {
