@@ -2,6 +2,7 @@ from rest_framework import serializers
 from apps.product.models import Category,Product,ProductCharacteristic
 from apps.seller.models import Seller,SellerApplication
 from .models import DocumentationSection
+from .models import Favorites
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 
@@ -15,6 +16,18 @@ class ProductCharacteristicSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCharacteristic
         fields = '__all__'
+
+
+class AddToFavoritesSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+
+class RemoveFromFavoritesSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+
+class FavoritesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorites
+        fields = ['user', 'favorite_products']
 
 
 class CategorySerializer(serializers.ModelSerializer):

@@ -12,10 +12,15 @@ urlpatterns = [
     path('category/<int:pk>/', CategoryRetrieveUpdateDestroyView.as_view(), name='category-rud'),
 
     path('products/', ProductListCreateView.as_view(), name='product-list-create'),
+    path('product-characteristics/', ProductCharacteristicList.as_view(), name='product-characteristics-list'),
     path('product/<int:pk>/', ProductRetrieveUpdateDestroyView.as_view(), name='product-rud'),
+
     path('product/<int:pk>/add-to-cart/', add_to_cart, name='add-to-cart'),
     path('product/<int:pk>/remove-from-cart/', remove_from_cart, name='remove-from-cart'),
-    path('product-characteristics/', ProductCharacteristicList.as_view(), name='product-characteristics-list'),
+
+    path('product/add-to-favorites/', AddToFavoritesView.as_view(), name='add-to-favorites'),
+    path('product/remove-from-favorites/', RemoveFromFavoritesView.as_view(), name='remove-from-favorites'),
+
 
 
     path('sellers/', SellerListCreateView.as_view(), name='sellers-list-create'),

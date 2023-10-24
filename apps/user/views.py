@@ -4,8 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.settings import api_settings
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from apps.api.serializers import *
 from django.contrib.auth import authenticate, login
+from apps.api.serializers import *
 from .models import *
 
 
@@ -49,3 +49,34 @@ class UserListCreateView(ListCreateAPIView):
 class UserRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+class AddToFavoritesView(APIView):
+    def post(self, request, format=None):
+        serializer = AddToFavoritesSerializer(data=request.data)
+        if serializer.is_valid():
+            product_id = serializer.validated_data['product_id']
+            user = request.user
+            try:
+                favorites = Favorites.objects.get(user=user)
+            except Favorites.DoesNotExist:
+                favorites = Favorites(user=user)
+                favorites.save()
+            
+            favorites.favorite_products.add(product_id)
+            return Response({'message': 'Product added to favorites successfully.'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class RemoveFromFavoritesView(APIView):
+    def post(self, request, format=None):
+        serializer = RemoveFromFavoritesSerializer(data=request.data)
+        if serializer.is_valid():
+            product_id = serializer.validated_data['product_id']
+            user = request.user
+            try:
+                favorites = Favorites.objects.get(user=user)
+                favorites.favorite_products.remove(product_id)
+                return Response({'message': 'Product removed from favorites successfully.'}, status=status.HTTP_200_OK)
+            except Favorites.DoesNotExist:
+                return Response({'error': 'Favorites not found for this user.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
