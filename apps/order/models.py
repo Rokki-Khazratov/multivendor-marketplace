@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from apps.product.models import Cart, ProductCharacteristic
+from apps.product.models import Cart, Product, ProductCharacteristic
 
 
 class Order(models.Model):
@@ -28,7 +28,7 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product = models.ForeignKey('Product', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     characteristics = models.ManyToManyField(ProductCharacteristic)
 

@@ -24,7 +24,7 @@ def handle_seller_application_status(sender, instance, **kwargs):
     if instance.status_changed:
         seller, _ = Seller.objects.get_or_create(user=instance.user)
         if instance.status == 'approved':
-            time.sleep(10)
+            time.sleep(3)
             instance.delete()
         elif instance.status == 'rejected':
             seller.delete()

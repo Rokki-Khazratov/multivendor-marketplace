@@ -2,7 +2,7 @@ from rest_framework import serializers
 from apps.product.models import Category,Product,ProductCharacteristic
 from apps.seller.models import Seller,SellerApplication
 from .models import DocumentationSection
-from .models import Favorites
+from apps.user.models import Favorites
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 
