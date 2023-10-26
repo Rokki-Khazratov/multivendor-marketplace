@@ -2,24 +2,21 @@ from django.contrib import admin
 from .models import *
 from .models import CartItem, CharacteristicQuantity
 
-# Определите административную модель для CharacteristicQuantity
 class CharacteristicQuantityAdmin(admin.TabularInline):
     model = CharacteristicQuantity
-    extra = 1  # Количество дополнительных записей для добавления
+    extra = 1 
 
-# Определите административную модель для CartItem
 class CartItemAdmin(admin.ModelAdmin):
     inlines = [CharacteristicQuantityAdmin]
 
 admin.site.register(CartItem, CartItemAdmin)
 
-class ProductImageAdmin (admin.StackedInline):
-    model = ProductImage
+class CharacteristicImageAdmin (admin.StackedInline):
+    model = CharacteristicImage
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    inlines = [ProductImageAdmin]
-    list_display = ['name','id', 'price', 'is_published', 'category']
+    list_display = ['name','id', 'is_published', 'category']
     list_filter = ['category',]
     search_fields = ['name', 'category__name']
     # exclude = ['handle']
@@ -31,7 +28,8 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(ProductCharacteristic)
 class ProductCharacteristicAdmin(admin.ModelAdmin):
-    list_display = ['name','id','value','quantity']
+    inlines = [CharacteristicImageAdmin]
+    list_display = ['name','id','value']
 
     class Meta:
         model = ProductCharacteristic

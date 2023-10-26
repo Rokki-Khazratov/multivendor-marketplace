@@ -7,25 +7,30 @@ from apps.user.views import *
 from apps.product.views import *
 
 urlpatterns = [
-    
+    #   ! product 
     path('categories/', CategoryListCreateView.as_view(), name='category-list-create'),
     path('category/<int:pk>/', CategoryRetrieveUpdateDestroyView.as_view(), name='category-rud'),
 
     path('products/', ProductListCreateView.as_view(), name='product-list-create'),
-    path('product-characteristics/', ProductCharacteristicList.as_view(), name='product-characteristics-list'),
+    path('characteristics/', ProductCharacteristicList.as_view(), name='product-characteristics-list'),
     path('product/<int:pk>/', ProductRetrieveUpdateDestroyView.as_view(), name='product-rud'),
 
-    path('product-images/', ProductImageListCreateView.as_view(), name='product-image-list-create'),
-    path('product-image/<int:pk>/', ProductImageRetrieveUpdateDestroyView.as_view(), name='product-image-rud'),
+    path('product-images/', CharacteristicImageListCreateView.as_view(), name='chatacterstic-image-list-create'),
+    path('chatacterstic-image/<int:pk>/', CharacteristicImageRetrieveUpdateDestroyView.as_view(), name='chatacterstic-image-rud'),
 
     path('product/<int:pk>/add-to-cart/', add_to_cart, name='add-to-cart'),
     path('product/<int:pk>/remove-from-cart/', remove_from_cart, name='remove-from-cart'),
+
+    path('carts/', CartListCreateView.as_view(), name='cart-list-create'),
+    path('carts/<int:pk>/', CartDetailView.as_view(), name='cart-detail'),
+    path('cartitems/', CartItemCreateView.as_view(), name='cart-item-create'),
+    path('cartitems/<int:pk>/', CartItemDetailView.as_view(), name='cart-item-detail'),
 
     path('product/add-to-favorites/', AddToFavoritesView.as_view(), name='add-to-favorites'),
     path('product/remove-from-favorites/', RemoveFromFavoritesView.as_view(), name='remove-from-favorites'),
 
 
-
+    #   !seller and user
     path('sellers/', SellerListCreateView.as_view(), name='sellers-list-create'),
     path('seller/<int:pk>/', SellerRetrieveUpdateDestroyView.as_view(), name='seller-rud'),
 

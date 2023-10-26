@@ -6,6 +6,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from apps.product.models import ProductCharacteristic
+from django.db.models import F, Sum
+from django.db.models import OuterRef, Subquery
+
+
 from .serializers import *
 from .models import *
 
@@ -15,12 +19,12 @@ class DocumentationSectionList(ListAPIView):
 
     def get_queryset(self):
         return DocumentationSection.objects.filter(parent_section__isnull=True)
+    
 
 class ProductListCreateView(ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = [filters.OrderingFilter]
-    ordering_fields = ['price']
 
     def get_queryset(self):
         queryset = Product.objects.all()
@@ -31,25 +35,36 @@ class ProductListCreateView(ListCreateAPIView):
         name = self.request.query_params.get('name')
         if name:
             queryset = queryset.filter(name__icontains=name)
+
         price_range = self.request.query_params.get('price')
         if price_range:
             min_price, max_price = price_range.split('-')
             queryset = queryset.filter(price__gte=min_price, price__lte=max_price)
 
+        characteristic_value = self.request.query_params.get('characteristic')
+        if characteristic_value:
+            queryset = queryset.filter(characteristics__value=characteristic_value)
+            queryset = queryset.annotate(
+                characteristic_price=F('characteristics__price')
+            ).order_by('characteristic_price')
+
+        # subquery = ProductImage.objects.filter(product=OuterRef('pk')).order_by('characteristic_id').values('image')[:1]
+        # queryset = queryset.annotate(main_image=Subquery(subquery))
+
         return queryset
-
-class ProductImageListCreateView(ListCreateAPIView):
-    queryset = ProductImage.objects.all()
-    serializer_class = ProductImageSerializer
-
-class ProductImageRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
-    queryset = ProductImage.objects.all()
-    serializer_class = ProductImageSerializer
-
 
 class ProductRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+class CharacteristicImageListCreateView(ListCreateAPIView):
+    queryset = CharacteristicImage.objects.all()
+    serializer_class = CharacteristicImageSerializer
+
+class CharacteristicImageRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    queryset = CharacteristicImage.objects.all()
+    serializer_class = CharacteristicImageSerializer
+
 
 class ProductCharacteristicList(ListCreateAPIView):
     serializer_class = ProductCharacteristicSerializer
@@ -57,11 +72,10 @@ class ProductCharacteristicList(ListCreateAPIView):
     def get_queryset(self):
         product_id = self.request.query_params.get('product_id')
         if product_id:
-            # Filter characteristics by the specified product
             return ProductCharacteristic.objects.filter(product=product_id)
         else:
-            # If no product_id is provided, return all characteristics
             return ProductCharacteristic.objects.all()
+
 
 
 

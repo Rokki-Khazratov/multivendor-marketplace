@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.product.models import Category,Product,ProductCharacteristic, ProductImage
+from apps.product.models import Cart, CartItem, Category,Product,ProductCharacteristic, CharacteristicImage
 from apps.seller.models import Seller,SellerApplication
 from .models import DocumentationSection
 from apps.user.models import Favorites
@@ -7,20 +7,76 @@ from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 
 
-class ProductSerializer(serializers.ModelSerializer):
+
+
+
+class CharacteristicImageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product
+        model = CharacteristicImage
         fields = '__all__'
 
-class ProductImageSerializer(serializers.ModelSerializer):
+
+class OneImageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ProductImage
-        fields = ('id', 'product', 'image')
+        model = CharacteristicImage
+        fields = ('image',)
 
 class ProductCharacteristicSerializer(serializers.ModelSerializer):
+    images = OneImageSerializer(many=True, read_only=True)
+
     class Meta:
         model = ProductCharacteristic
         fields = '__all__'
+
+class ProductSerializer(serializers.ModelSerializer):
+    main_image = serializers.SerializerMethodField()
+    prices = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = ('name', 'seller','rating', 'category', 'main_image', 'prices')
+
+    def get_main_image(self, obj):
+        main_image = None
+        for characteristic in obj.productcharacteristic_set.all():
+            images = characteristic.characteristicimage_set.all()
+            if images:
+                main_image = images[0].image.url
+                break
+        return main_image
+
+    def get_prices(self, obj):
+        characteristics = []
+        for characteristic in obj.productcharacteristic_set.all():
+            characteristics.append({
+                # 'name': characteristic.name,
+                # 'value': characteristic.value,
+                'price': characteristic.price,
+                'discount_price': characteristic.discount_price,
+            })
+        return characteristics
+
+
+
+
+
+
+
+class CartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = '__all__'
+
+class CartSerializer(serializers.ModelSerializer):
+    cart_items = CartItemSerializer(many=True, read_only=True)
+    total_price = serializers.DecimalField(source='get_total_price', max_digits=10, decimal_places=2, read_only=True)
+
+    class Meta:
+        model = Cart
+        fields = '__all__'
+
+
+
 
 
 class AddToFavoritesSerializer(serializers.Serializer):

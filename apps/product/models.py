@@ -2,6 +2,7 @@ from django.db import models
 from apps.seller.models import Seller
 from django.contrib.auth.models import User
 from django.db.models import F, Sum
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Category(models.Model):
@@ -11,13 +12,8 @@ class Category(models.Model):
         return self.name
 
     
-class ProductCharacteristic(models.Model):
-    name = models.CharField(max_length=255)
-    value = models.CharField(max_length=255)
-    quantity = models.PositiveIntegerField(default=0)
 
-    def __str__(self):
-        return f"{self.name}: {self.value} - {self.quantity}"
+
         
 
 #! Product's things ----------------------------
@@ -27,9 +23,7 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     handle = models.SlugField(unique=True) 
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    discount_price = models.DecimalField(max_digits=10, decimal_places=2)
-    characteristics = models.ManyToManyField(ProductCharacteristic)
+    rating = models.DecimalField(max_digits=3, decimal_places=1, validators=[MinValueValidator(0.0), MaxValueValidator(5.0)])
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -37,18 +31,44 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+    # def get_main_image_url(self):
+    #     main_image = CharacteristicImage.objects.filter(product=self, characteristic=None).first()
+    #     return main_image.image.url if main_image else None
 
+class ProductCharacteristic(models.Model):
+    name = models.CharField(max_length=255)
+    value = models.CharField(max_length=255)
+    discount_price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    product = models.ForeignKey(Product,on_delete=models.CASCADE)
+    quantity = models.PositiveSmallIntegerField(null=True, blank=True)
 
-class ProductImage(models.Model):
-    product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
+    def __str__(self):
+        return f"{self.name}: {self.value}"
+
+class CharacteristicImage(models.Model):
+    characteristic = models.ForeignKey(ProductCharacteristic, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='product_images/')
+    characteristic = models.ForeignKey(ProductCharacteristic, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Image for  {self.characteristic.name}"
+
+class CharacteristicQuantity(models.Model):
+    cart_item = models.ForeignKey('CartItem', on_delete=models.CASCADE)
+    characteristic = models.ForeignKey(ProductCharacteristic, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=0)
+    
+    def __str__(self):
+        return f"{self.cart_item} - {self.characteristic.name} : {self.quantity}"
 
 
-class Review(models.Model):
-    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
-    rating = models.PositiveIntegerField()
-    comment = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+
+
+
+
+
 
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -74,14 +94,6 @@ class Cart(models.Model):
     def __str__(self):
         return f"{self.user.username}'s cart"
 
-class CharacteristicQuantity(models.Model):
-    cart_item = models.ForeignKey('CartItem', on_delete=models.CASCADE)
-    characteristic = models.ForeignKey(ProductCharacteristic, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=0)
-    
-    def __str__(self):
-        return f"{self.cart_item} - {self.characteristic.name} : {self.quantity}"
-
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -93,13 +105,8 @@ class CartItem(models.Model):
     
 
     
-
-    
-
-
-
-
-
-
-
-
+class Review(models.Model):
+    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField()
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
