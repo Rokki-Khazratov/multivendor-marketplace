@@ -95,17 +95,6 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             images.append(characteristic_data)
         return images
 
-    # def get_characteristics(self, obj):
-    #     characteristics = []
-    #     for characteristic in obj.productcharacteristic_set.all():
-    #         characteristics.append({
-    #             'name': characteristic.name,
-    #             'value': characteristic.value,
-    #             'price': characteristic.price,
-    #             'discount_price': characteristic.discount_price,
-    #         })
-    #     return characteristics
-
     def get_rating(self, obj):
         if obj.reviews.exists():
             average_rating = obj.reviews.aggregate(Avg('rating'))['rating__avg']
