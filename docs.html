@@ -2,6 +2,8 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Documantation</title>
     <style>
         body {
@@ -14,7 +16,7 @@
 
         /* Стили для JSON-ответов */
         pre {
-            background-color: #660000	;
+            background-color: #660000;
             /* Красный цвет фона для ответов */
             color: #fff;
             /* Белый текст */
@@ -227,6 +229,55 @@
     }
 ]
 </pre>
+    <h2>Изображения продукта (Product Images)</h2>
+
+    <h3>Получение списка изображений продукта</h3>
+    <p><strong>GET /product-images/ - Получить список всех изображений продукта.</strong></p>
+    <p>Пример ответа:</p>
+    <pre>
+[
+    {
+        "id": 1,
+        "product": 1,
+        "image": "URL_to_image_1"
+    },
+    {
+        "id": 2,
+        "product": 1,
+        "image": "URL_to_image_2"
+    }
+]
+</pre>
+
+    <h3>Добавление нового изображения продукта</h3>
+    <p><strong>POST /product-images/ - Загрузить новое изображение продукта.</strong></p>
+    <p>Требуется аутентификация.</p>
+    <p>Параметры запроса:</p>
+    <ul>
+        <li>product (целое число) - ID продукта, к которому относится изображение.</li>
+        <li>image (файл) - Загружаемое изображение.</li>
+    </ul>
+    <p>Пример запроса:</p>
+    <pre>
+{
+    "product": 1,
+    "image": "your_image_file.jpg"
+}
+</pre>
+    <p>Пример ответа:</p>
+    <pre>
+{
+    "id": 3,
+    "product": 1,
+    "image": "URL_to_uploaded_image"
+}
+</pre>
+
+    <h3>Работа с отдельным изображением продукта</h3>
+    <p><strong>GET /product-image/{id}/ - Получить информацию о конкретном изображении продукта.</strong></p>
+    <p><strong>PUT /product-image/{id}/ - Обновить информацию о изображении продукта.</strong></p>
+    <p><strong>DELETE /product-image/{id}/ - Удалить изображение продукта.</strong></p>
+
 
     <h2>Корзина</h2>
 

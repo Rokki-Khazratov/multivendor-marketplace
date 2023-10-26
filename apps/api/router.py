@@ -15,6 +15,9 @@ urlpatterns = [
     path('product-characteristics/', ProductCharacteristicList.as_view(), name='product-characteristics-list'),
     path('product/<int:pk>/', ProductRetrieveUpdateDestroyView.as_view(), name='product-rud'),
 
+    path('product-images/', ProductImageListCreateView.as_view(), name='product-image-list-create'),
+    path('product-image/<int:pk>/', ProductImageRetrieveUpdateDestroyView.as_view(), name='product-image-rud'),
+
     path('product/<int:pk>/add-to-cart/', add_to_cart, name='add-to-cart'),
     path('product/<int:pk>/remove-from-cart/', remove_from_cart, name='remove-from-cart'),
 

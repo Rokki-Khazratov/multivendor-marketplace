@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.product.models import Category,Product,ProductCharacteristic
+from apps.product.models import Category,Product,ProductCharacteristic, ProductImage
 from apps.seller.models import Seller,SellerApplication
 from .models import DocumentationSection
 from apps.user.models import Favorites
@@ -11,6 +11,11 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ('id', 'product', 'image')
 
 class ProductCharacteristicSerializer(serializers.ModelSerializer):
     class Meta:

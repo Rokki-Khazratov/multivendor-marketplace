@@ -38,6 +38,14 @@ class ProductListCreateView(ListCreateAPIView):
 
         return queryset
 
+class ProductImageListCreateView(ListCreateAPIView):
+    queryset = ProductImage.objects.all()
+    serializer_class = ProductImageSerializer
+
+class ProductImageRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    queryset = ProductImage.objects.all()
+    serializer_class = ProductImageSerializer
+
 
 class ProductRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
