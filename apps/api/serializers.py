@@ -2,13 +2,18 @@ from rest_framework import serializers
 from apps.product.models import Cart, CartItem, Category,Product,ProductCharacteristic, CharacteristicImage
 from apps.seller.models import Seller,SellerApplication
 from .models import DocumentationSection
-from apps.user.models import Favorites
+from apps.user.models import Favorites, Review
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
+from django.db.models import Avg
 
 
 
 
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = '__all__'
 
 class CharacteristicImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,32 +34,85 @@ class ProductCharacteristicSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProductSerializer(serializers.ModelSerializer):
-    main_image = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
     prices = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ('name', 'seller','rating', 'category', 'main_image', 'prices')
+        fields = ('id', 'name', 'seller', 'category', 'image', 'prices', 'rating')
 
-    def get_main_image(self, obj):
-        main_image = None
+    def get_image(self, obj):
+        image = None
         for characteristic in obj.productcharacteristic_set.all():
             images = characteristic.characteristicimage_set.all()
             if images:
-                main_image = images[0].image.url
+                image = images[0].image.url
                 break
-        return main_image
+        return image
 
     def get_prices(self, obj):
         characteristics = []
         for characteristic in obj.productcharacteristic_set.all():
             characteristics.append({
-                # 'name': characteristic.name,
-                # 'value': characteristic.value,
                 'price': characteristic.price,
                 'discount_price': characteristic.discount_price,
             })
         return characteristics
+
+    def get_rating(self, obj):
+        if obj.reviews.exists():
+            average_rating = obj.reviews.aggregate(Avg('rating'))['rating__avg']
+            return round(average_rating, 1) 
+        else:
+            return None
+        
+
+
+
+
+class ProductDetailSerializer(serializers.ModelSerializer):
+    characteristics = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
+    reviews = ReviewSerializer(many=True)  
+
+    class Meta:
+        model = Product
+        fields ='__all__'
+
+    def get_characteristics(self, obj):
+        images = []
+        for characteristic in obj.productcharacteristic_set.all():
+            characteristic_data = {
+                'name': characteristic.name,
+                'value': characteristic.value,
+                'price': characteristic.price,
+                'discount_price': characteristic.discount_price,
+                'images': []  # Создайте список для изображений внутри характеристики
+            }
+            for image in characteristic.characteristicimage_set.all():
+                characteristic_data['images'].append(image.image.url)
+            images.append(characteristic_data)
+        return images
+
+    # def get_characteristics(self, obj):
+    #     characteristics = []
+    #     for characteristic in obj.productcharacteristic_set.all():
+    #         characteristics.append({
+    #             'name': characteristic.name,
+    #             'value': characteristic.value,
+    #             'price': characteristic.price,
+    #             'discount_price': characteristic.discount_price,
+    #         })
+    #     return characteristics
+
+    def get_rating(self, obj):
+        if obj.reviews.exists():
+            average_rating = obj.reviews.aggregate(Avg('rating'))['rating__avg']
+            return round(average_rating, 1) 
+        else:
+            return None
+
 
 
 
@@ -89,6 +147,11 @@ class FavoritesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorites
         fields = ['user', 'favorite_products']
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = '__all__'
 
 
 class CategorySerializer(serializers.ModelSerializer):

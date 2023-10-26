@@ -1,8 +1,11 @@
+import statistics
 import time
 from django.db.models.signals import post_save,pre_save
 from django.dispatch import receiver
 from django.db.models import F, Sum
-from apps.product.models import CartItem, CharacteristicQuantity
+from requests import Response
+from apps.product.models import CartItem, CharacteristicQuantity, Product
+from apps.user.models import Review
 from .models import Seller, SellerApplication
 
 
@@ -38,6 +41,17 @@ def update_cart_item(sender, instance, created, **kwargs):
     cart_item.characteristic_quantity = instance 
     cart_item.save()
 
-
-
-
+@receiver(post_save, sender=Review)
+def add_review_to_product(sender, instance, **kwargs):
+    product_id = instance.product_id
+    try:
+        product = Product.objects.get(id=product_id)
+        product.reviews.add(instance)
+    except Product.DoesNotExist:
+        return Response({'error': 'Продукт не найден'}, status=statistics.HTTP_404_NOT_FOUND)
+    
+# @receiver(post_save, sender=Review)
+# def add_review_to_product(sender, instance, created, **kwargs):
+#     if created:
+#         product = instance.product  # Получить связанный с отзывом продукт
+#         product.reviews.add(instance)

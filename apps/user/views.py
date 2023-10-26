@@ -80,3 +80,11 @@ class RemoveFromFavoritesView(APIView):
             except Favorites.DoesNotExist:
                 return Response({'error': 'Favorites not found for this user.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ReviewListCreateView(ListCreateAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+class ReviewRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer

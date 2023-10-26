@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.db.models import F, Sum
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+# from apps.user.models import Review
+
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
@@ -23,7 +25,7 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     handle = models.SlugField(unique=True) 
-    rating = models.DecimalField(max_digits=3, decimal_places=1, validators=[MinValueValidator(0.0), MaxValueValidator(5.0)])
+    reviews = models.ManyToManyField('user.Review', related_name='products', blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -32,9 +34,14 @@ class Product(models.Model):
     def __str__(self):
         return self.name
     
-    # def get_main_image_url(self):
-    #     main_image = CharacteristicImage.objects.filter(product=self, characteristic=None).first()
-    #     return main_image.image.url if main_image else None
+    def save(self, *args, **kwargs):
+        if self.reviews.count() > 0:
+            total_rating = sum(review.rating for review in self.reviews.all())
+            self.rating = total_rating / self.reviews.count()
+        else:
+            self.rating = 0.0
+
+        super(Product, self).save(*args, **kwargs)
 
 class ProductCharacteristic(models.Model):
     name = models.CharField(max_length=255)
@@ -102,11 +109,3 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"Cart Item for Cart {self.cart.id}"   
-    
-
-    
-class Review(models.Model):
-    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
-    rating = models.PositiveIntegerField()
-    comment = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)

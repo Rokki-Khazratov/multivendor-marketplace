@@ -55,7 +55,7 @@ class ProductListCreateView(ListCreateAPIView):
 
 class ProductRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+    serializer_class = ProductDetailSerializer
 
 class CharacteristicImageListCreateView(ListCreateAPIView):
     queryset = CharacteristicImage.objects.all()
