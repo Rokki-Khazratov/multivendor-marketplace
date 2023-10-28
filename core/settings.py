@@ -3,11 +3,12 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+BASE_URL = 'https://tg.robolab.uz'
+
 SECRET_KEY = 'django-insecure--z2p=&yhm5+xy13-%qupu%$h7v1okcrv3^wql4_&r%368bakx$'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 
 
 INSTALLED_APPS = [

@@ -1,3 +1,4 @@
+from core import settings
 from rest_framework import serializers
 from apps.product.models import Cart, CartItem, Category,Product,ProductCharacteristic, CharacteristicImage
 from apps.seller.models import Seller,SellerApplication
@@ -33,39 +34,50 @@ class ProductCharacteristicSerializer(serializers.ModelSerializer):
         model = ProductCharacteristic
         fields = '__all__'
 
+
+
+
+
+
+
 class ProductSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
-    prices = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
+    characteristics = ProductCharacteristicSerializer(many=True, read_only=True)  # Include 'characteristics' field
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'seller', 'category', 'image', 'prices', 'rating')
+        fields = ('id', 'name', 'seller', 'category', 'image', 'price', 'rating', 'characteristics')  # Include 'characteristics' field in 'fields'
+
 
     def get_image(self, obj):
         image = None
         for characteristic in obj.productcharacteristic_set.all():
             images = characteristic.characteristicimage_set.all()
             if images:
-                image = images[0].image.url
+                image = settings.BASE_URL + images[0].image.url
                 break
         return image
 
-    def get_prices(self, obj):
-        characteristics = []
+    def get_price(self, obj):
+        price = []
         for characteristic in obj.productcharacteristic_set.all():
-            characteristics.append({
+            price.append({
                 'price': characteristic.price,
                 'discount_price': characteristic.discount_price,
             })
-        return characteristics
+        return price
 
     def get_rating(self, obj):
         if obj.reviews.exists():
             average_rating = obj.reviews.aggregate(Avg('rating'))['rating__avg']
-            return round(average_rating, 1) 
+            return round(average_rating, 1)
         else:
             return None
+
+
+
         
 
 
