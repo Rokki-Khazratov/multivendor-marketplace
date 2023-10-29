@@ -3,7 +3,8 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-BASE_URL = 'https://tg.robolab.uz'
+# BASE_URL = 'https://tg.robolab.uz'
+BASE_URL = 'http://127.0.0.1:8000'
 
 SECRET_KEY = 'django-insecure--z2p=&yhm5+xy13-%qupu%$h7v1okcrv3^wql4_&r%368bakx$'
 DEBUG = True
@@ -118,6 +119,11 @@ USE_TZ = True
 
 APPEND_SLASH = False
 
-STATIC_URL = 'static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Настройки для обработки статических файлов (если еще не установлены)
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

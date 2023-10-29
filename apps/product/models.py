@@ -48,7 +48,7 @@ class ProductCharacteristic(models.Model):
     value = models.CharField(max_length=255)
     discount_price = models.DecimalField(max_digits=10, decimal_places=2)
     price = models.DecimalField(max_digits=10, decimal_places=2) 
-    product = models.ForeignKey(Product,on_delete=models.CASCADE,related_name='characteristics')
+    product = models.ForeignKey(Product,on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField(null=True, blank=True)
 
     def __str__(self):
