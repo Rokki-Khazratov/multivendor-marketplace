@@ -43,24 +43,19 @@ class Product(models.Model):
 
         super(Product, self).save(*args, **kwargs)
 
-    def get_price(self):
-        price = ProductCharacteristic.get_price(ProductCharacteristic)
-        return price
-
 class ProductCharacteristic(models.Model):
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
     discount_price = models.DecimalField(max_digits=10, decimal_places=2)
     price = models.DecimalField(max_digits=10, decimal_places=2) 
-    product = models.ForeignKey(Product,on_delete=models.CASCADE)
+    product = models.ForeignKey(Product,on_delete=models.CASCADE,related_name='characteristics')
     quantity = models.PositiveSmallIntegerField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.name}: {self.value}"
-    
-    def get_price(self):
-        price = self.price
-        return price
+
+
+
 
 class CharacteristicImage(models.Model):
     characteristic = models.ForeignKey(ProductCharacteristic, related_name='images', on_delete=models.CASCADE)
@@ -69,6 +64,11 @@ class CharacteristicImage(models.Model):
 
     def __str__(self):
         return f"Image for  {self.characteristic.name}"
+
+
+
+
+
 
 class CharacteristicQuantity(models.Model):
     cart_item = models.ForeignKey('CartItem', on_delete=models.CASCADE)

@@ -41,33 +41,40 @@ class ProductCharacteristicSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
-    price = serializers.SerializerMethodField()
+    # image = serializers.SerializerMethodField()
+    # price = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
-    characteristics = ProductCharacteristicSerializer(many=True, read_only=True)  # Include 'characteristics' field
+    # characteristics = ProductCharacteristicSerializer(many=True, read_only=True)  # Include 'characteristics' field
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'seller', 'category', 'image', 'price', 'rating', 'characteristics')  # Include 'characteristics' field in 'fields'
+        fields = ('id', 'name', 'seller', 'category',  'rating', 'characteristics')  # Include 'characteristics' field in 'fields'
 
 
-    def get_image(self, obj):
-        image = None
-        for characteristic in obj.productcharacteristic_set.all():
-            images = characteristic.characteristicimage_set.all()
-            if images:
-                image = settings.BASE_URL + images[0].image.url
-                break
-        return image
+    # def get_image(self, obj):
+    #     image = None
+    #     for characteristic in obj.productcharacteristic_set.all():
+    #         images = characteristic.characteristicimage_set.all()
+    #         if images:
+    #             image = settings.BASE_URL + images[0].image.url
+    #             break
+    #     return image
 
-    def get_price(self, obj):
-        price = []
-        for characteristic in obj.productcharacteristic_set.all():
-            price.append({
-                'price': characteristic.price,
-                'discount_price': characteristic.discount_price,
-            })
-        return price
+    # def get_price(self, obj):
+    #     main_price = None
+    #     # main_discount_price = None
+    #     for characteristic in obj.productcharacteristic_set.all():
+    #         prices = characteristic.characteristicprice_set.all()
+    #         if prices:
+    #             main_price = prices[0].price
+    #             main_discount_price = prices[0].discount_price
+    #             break
+    #     return  prices
+    #     {
+    #         'main_price': main_price,
+    #         'main_discount_price': main_discount_price
+    #     }
+
 
     def get_rating(self, obj):
         if obj.reviews.exists():

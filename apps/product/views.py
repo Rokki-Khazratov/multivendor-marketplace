@@ -9,6 +9,7 @@ from .models import *
 from .models import Cart, CartItem
 from apps.api.serializers import CartSerializer, CartItemSerializer
 
+
 class CartListCreateView(generics.ListCreateAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
