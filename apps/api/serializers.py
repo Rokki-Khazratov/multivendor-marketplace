@@ -88,36 +88,38 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 
+
+
 class ProductDetailSerializer(serializers.ModelSerializer):
     characteristics = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
-    reviews = ReviewSerializer(many=True)  
+    reviews = ReviewSerializer(many=True)
 
     class Meta:
         model = Product
-        fields ='__all__'
+        fields = '__all__'
 
     def get_characteristics(self, obj):
-        images = []
+        characteristics = []
         for characteristic in obj.productcharacteristic_set.all():
             characteristic_data = {
                 'name': characteristic.name,
                 'value': characteristic.value,
                 'price': characteristic.price,
                 'discount_price': characteristic.discount_price,
-                'images': []  # Создайте список для изображений внутри характеристики
+                'images': [settings.BASE_URL + image.image.url for image in characteristic.characteristicimage_set.all()]
             }
-            for image in characteristic.characteristicimage_set.all():
-                characteristic_data['images'].append(image.image.url)
-            images.append(characteristic_data)
-        return images
+            characteristics.append(characteristic_data)
+        return characteristics
 
     def get_rating(self, obj):
         if obj.reviews.exists():
             average_rating = obj.reviews.aggregate(Avg('rating'))['rating__avg']
-            return round(average_rating, 1) 
+            return round(average_rating, 1)
         else:
             return None
+
+
 
 
 
