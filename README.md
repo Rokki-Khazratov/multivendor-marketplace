@@ -1,7 +1,6 @@
 # How to run ? 
 
 
-
 ```
 Windows
 pip install -r requirements.txt
@@ -15,8 +14,6 @@ pip3 install -r requirements.txt
 python3 manage.py migrate
 python3 manage.py runserver
 ```
-
-
 
 
 project docs : https://robolab.uz/api-docs.html
