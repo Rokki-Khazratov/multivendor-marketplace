@@ -53,11 +53,15 @@ class Review(models.Model):
     info = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Review by {self.user.username} : {self.rating}"
-
     def save(self, *args, **kwargs):
         super(Review, self).save(*args, **kwargs)
+
+        # Добавьте отзыв к отзывам о продукте
+        if self.product:
+            self.product.reviews.add(self)
+
+    def __str__(self):
+        return f"Review by {self.user.username} : {self.rating}"
 
 class ReviewImage(models.Model):
     review = models.ForeignKey(Review, related_name='images', on_delete=models.CASCADE)

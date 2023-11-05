@@ -33,6 +33,17 @@ class ProductAdmin(admin.ModelAdmin):
     # exclude = ['handle']
     prepopulated_fields = {'handle': ('name',)}
     list_per_page = 20
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('reviews')
+
+    def reviews_count(self, obj):
+        return obj.reviews.count()
+
+    list_display = ('id', 'name', 'category', 'reviews_count')
+    list_filter = ('category',)
+    search_fields = ('name', 'category__name')
+    readonly_fields = ('reviews_count',)
 
     class Meta:
         model = Product
