@@ -21,7 +21,6 @@ class Favorites(models.Model):
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=0.0, validators=[MinValueValidator(0.0), MaxValueValidator(5.0)])
-    image = models.ImageField(upload_to='review_images/', null=True, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     info = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -31,3 +30,10 @@ class Review(models.Model):
 
     def save(self, *args, **kwargs):
         super(Review, self).save(*args, **kwargs)
+
+class ReviewImage(models.Model):
+    review = models.ForeignKey(Review, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='review_images/')
+
+    def __str__(self):
+        return f"Image for  {self.user.id}"

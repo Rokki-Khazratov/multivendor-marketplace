@@ -8,6 +8,9 @@ from apps.product.views import *
 
 urlpatterns = [
     #   ! product 
+    path('parent_categories/', ParentCategoryListCreateView.as_view(), name='parentcategory-list-create'),
+    path('parent_category/<int:pk>/', ParentCategoryRetrieveUpdateDestroyView.as_view(), name='parent-category-rud'),
+
     path('categories/', CategoryListCreateView.as_view(), name='category-list-create'),
     path('category/<int:pk>/', CategoryRetrieveUpdateDestroyView.as_view(), name='category-rud'),
 

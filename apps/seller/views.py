@@ -25,9 +25,9 @@ class SellerApplicationCreateView(generics.CreateAPIView):
 class SellerApplicationListView(generics.ListCreateAPIView):
     queryset = SellerApplication.objects.all()
     serializer_class = SellerApplicationSerializer
-    permission_classes = [permissions.IsAdminUser]
+    # permission_classes = [permissions.IsAdminUser]
 
 class SellerApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = SellerApplication.objects.all()
     serializer_class = SellerApplicationSerializer
-    permission_classes = [permissions.IsAdminUser]
+    # permission_classes = [permissions.IsAdminUser]

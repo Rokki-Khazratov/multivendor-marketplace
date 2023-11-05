@@ -1,6 +1,6 @@
 from core import settings
 from rest_framework import serializers
-from apps.product.models import Cart, CartItem, Category,Product,ProductCharacteristic, CharacteristicImage
+from apps.product.models import Cart, CartItem, Category, ParentCategory,Product,ProductCharacteristic, CharacteristicImage
 from apps.seller.models import Seller,SellerApplication
 from .models import DocumentationSection
 from apps.user.models import Favorites, Review
@@ -12,9 +12,12 @@ from django.db.models import Avg
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    # user_name:
     class Meta:
         model = Review
         fields = '__all__'
+
+
 
 class CharacteristicImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -161,6 +164,11 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = '__all__'
 
+
+class ParentCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ParentCategory
+        fields = '__all__'
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

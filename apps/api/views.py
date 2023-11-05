@@ -24,7 +24,7 @@ class DocumentationSectionList(ListAPIView):
 class ProductListCreateView(ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    filter_backends = [filters.OrderingFilter]
+    filter_backends = [filters.OrderingFilter] 
 
     def get_queryset(self):
         queryset = Product.objects.all()
@@ -80,16 +80,38 @@ class ProductCharacteristicList(ListCreateAPIView):
 
 
 
-class CategoryListCreateView(ListCreateAPIView):
-    serializer_class = CategorySerializer
+class ParentCategoryListCreateView(ListCreateAPIView):
+    serializer_class = ParentCategorySerializer
     filter_backends = [filters.OrderingFilter]
 
     def get_queryset(self):
-        queryset = Category.objects.all()
+        queryset = ParentCategory.objects.all()
         name = self.request.query_params.get('name')
         if name:
             queryset = queryset.filter(name__icontains=name)
         return queryset    
+
+class ParentCategoryRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    queryset = ParentCategory.objects.all()
+    serializer_class = ParentCategorySerializer
+
+
+
+class CategoryListCreateView(ListCreateAPIView):
+    serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        queryset = Category.objects.all()
+        name = self.request.query_params.get('name')
+        parent = self.request.query_params.get('parent')
+
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+
+        if parent:
+            queryset = queryset.filter(parent__name__icontains=parent)
+
+        return queryset
 
 class CategoryRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()

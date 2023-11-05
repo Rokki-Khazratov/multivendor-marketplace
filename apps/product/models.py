@@ -7,8 +7,16 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 # from apps.user.models import Review
 
 
+class ParentCategory(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
+
 class Category(models.Model):
     name = models.CharField(max_length=255)
+    parent = models.ForeignKey(ParentCategory, null=True, blank=True,on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -34,14 +42,14 @@ class Product(models.Model):
     def __str__(self):
         return self.name
     
-    def save(self, *args, **kwargs):
-        if self.reviews.count() > 0:
-            total_rating = sum(review.rating for review in self.reviews.all())
-            self.rating = total_rating / self.reviews.count()
-        else:
-            self.rating = 0.0
+    # def save(self, *args, **kwargs):
+    #     if self.reviews.count() > 0:
+    #         total_rating = sum(review.rating for review in self.reviews.all())
+    #         self.rating = total_rating / self.reviews.count()
+    #     else:
+    #         self.rating = 0.0
 
-        super(Product, self).save(*args, **kwargs)
+    #     super(Product, self).save(*args, **kwargs)
 
 class ProductCharacteristic(models.Model):
     name = models.CharField(max_length=255)

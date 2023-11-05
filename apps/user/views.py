@@ -81,9 +81,19 @@ class RemoveFromFavoritesView(APIView):
                 return Response({'error': 'Favorites not found for this user.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class ReviewListCreateView(ListCreateAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        queryset = Review.objects.all()
+        product_id = self.request.query_params.get('product')
+        if product_id:
+            queryset = queryset.filter(product_id=product_id)
+
+        return queryset
+
 
 class ReviewRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
