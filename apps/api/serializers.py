@@ -159,10 +159,22 @@ class FavoritesSerializer(serializers.ModelSerializer):
         model = Favorites
         fields = ['user', 'favorite_products']
 
+
 class ReviewSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()  # Custom field for user data
+    images = serializers.SerializerMethodField()  # Custom field for image URLs
+
     class Meta:
         model = Review
-        fields = '__all__'
+        fields = ['id', 'rating', 'info', 'created_at', 'user', 'product', 'images']
+
+    def get_user(self, obj):
+        return f"{obj.user.first_name} {obj.user.last_name}"
+
+    def get_images(self, obj):
+        # Assuming you have a related field 'images' on the Review model, adjust this accordingly
+        image_urls = [settings.BASE_URL + image.image.url for image in obj.images.all()]  # Adjust for your image field
+        return image_urls
 
 
 class ParentCategorySerializer(serializers.ModelSerializer):

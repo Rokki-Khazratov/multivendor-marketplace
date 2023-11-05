@@ -4,8 +4,9 @@ from django.db.models.signals import post_save,pre_save
 from django.dispatch import receiver
 from django.db.models import F, Sum
 from requests import Response
+from apps import user
 from apps.product.models import CartItem, CharacteristicQuantity, Product
-from apps.user.models import Review
+from apps.user.models import Review, UserProfile
 from .models import Seller, SellerApplication
 
 
@@ -55,3 +56,6 @@ def add_review_to_product(sender, instance, **kwargs):
 #     if created:
 #         product = instance.product  # Получить связанный с отзывом продукт
 #         product.reviews.add(instance)
+
+
+
