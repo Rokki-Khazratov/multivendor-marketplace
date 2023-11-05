@@ -43,12 +43,12 @@ class LoginView(APIView):
 
 
 class UserListCreateView(ListCreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
 
 class UserRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
 
 
 class AddToFavoritesView(APIView):

@@ -4,9 +4,15 @@ from django.contrib.auth.models import User
 
 class Seller(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='seller_profile')
-    store_name = models.CharField(max_length=255,blank=True, null=True)
-    address = models.CharField(max_length=255,blank=True, null=True)
-    phone_number = models.CharField(max_length=15, blank=True, null=True, default='+998')
+    store_name = models.CharField(max_length=255, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    PREMIUM_TARIFF_CHOICES = [
+        (1, 'Basic'),
+        (2, 'Standard'),
+        (3, 'Premium'),
+    ]
+    premium_tariff = models.CharField(max_length=10, choices=PREMIUM_TARIFF_CHOICES, default='basic')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

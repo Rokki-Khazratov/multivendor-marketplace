@@ -12,10 +12,14 @@ class SellerRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Seller.objects.all()
     serializer_class = SellerSerializer
 
+
+
+
+
 class SellerApplicationCreateView(generics.CreateAPIView):
     queryset = SellerApplication.objects.all()
     serializer_class = SellerApplicationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
      
 
     def perform_create(self, serializer):

@@ -11,6 +11,15 @@ from django.dispatch import receiver
 
 
 
+class Favorites(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    favorite_products = models.ManyToManyField(Product, blank=True)
+
+    def add_to_favorites(self, product):
+        self.favorite_products.add(product)
+
+    def remove_from_favorites(self, product):
+        self.favorite_products.remove(product)
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -33,15 +42,6 @@ def save_user_profile(sender, instance, **kwargs):
 
 
 
-class Favorites(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    favorite_products = models.ManyToManyField(Product, blank=True)
-
-    def add_to_favorites(self, product):
-        self.favorite_products.add(product)
-
-    def remove_from_favorites(self, product):
-        self.favorite_products.remove(product)
 
 
 

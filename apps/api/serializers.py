@@ -6,6 +6,7 @@ from .models import DocumentationSection
 from apps.user.models import Favorites, Review
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
+from apps.user.models import UserProfile
 from django.db.models import Avg
 
 
@@ -188,9 +189,25 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class SellerSerializer(serializers.ModelSerializer):
+    def map_premium_tariff(self, obj):
+        if obj.premium_tariff == 'basic':
+            return 1
+        elif obj.premium_tariff == 'standard':
+            return 2
+        elif obj.premium_tariff == 'premium':
+            return 3
+        return None
+
+    premium_tariff = serializers.SerializerMethodField(method_name='map_premium_tariff')
+
     class Meta:
         model = Seller
-        fields = '__all__'
+        fields = (
+            'id', 'premium_tariff', 'store_name', 'address',
+            'phone_number', 'created_at', 'updated_at', 'user'
+        )
+
+
 
 class SellerApplicationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -226,3 +243,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
         return data
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    user_profile = UserSerializer(source='user')
+    class Meta:
+        model = UserProfile
+        fields = '__all__'
