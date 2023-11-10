@@ -1,3 +1,4 @@
+from django.forms import ImageField
 from core import settings
 from rest_framework import serializers
 from apps.product.models import Cart, CartItem, Category, ParentCategory,Product,ProductCharacteristic, CharacteristicImage
@@ -9,6 +10,9 @@ from rest_framework.exceptions import ValidationError
 from apps.user.models import UserProfile
 from django.db.models import Avg
 
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile  
 
 
 
@@ -93,7 +97,6 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 
-
 class ProductDetailSerializer(serializers.ModelSerializer):
     characteristics = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
@@ -111,10 +114,45 @@ class ProductDetailSerializer(serializers.ModelSerializer):
                 'value': characteristic.value,
                 'price': characteristic.price,
                 'discount_price': characteristic.discount_price,
-                'images': [settings.BASE_URL + image.image.url for image in characteristic.characteristicimage_set.all()]
+                'images': self.get_resized_images(characteristic.characteristicimage_set.all())
             }
             characteristics.append(characteristic_data)
         return characteristics
+
+    def get_resized_images(self, images):
+        resized_images = []
+        for image in images:
+            original_image = Image.open(image.image.path)
+
+            # Original size
+            original_url = settings.BASE_URL + image.image.url
+
+            # middle
+            middle_image = original_image.resize((original_image.width // 2, original_image.height // 2))
+            middle_io = BytesIO()
+            middle_image.save(middle_io, format='PNG')
+            middle_io.seek(0)
+            middle_url = self.save_resized_image(image, middle_io)
+
+            # low
+            low_image = original_image.resize((original_image.width // 4, original_image.height // 4))
+            low_io = BytesIO()
+            low_image.save(low_io, format='PNG')
+            low_io.seek(0)
+            low_url = self.save_resized_image(image, low_io)
+
+            resized_images.append({
+                'original': original_url,
+                'middle': middle_url,
+                'low': low_url
+            })
+
+        return resized_images
+
+    def save_resized_image(self, image_instance, resized_io):
+        image_instance.image.save(image_instance.image.name, ContentFile(resized_io.read()), save=False)
+
+        return settings.BASE_URL + image_instance.image.url
 
     def get_rating(self, obj):
         if obj.reviews.exists():
@@ -122,6 +160,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             return round(average_rating, 1)
         else:
             return None
+
+
 
 
 

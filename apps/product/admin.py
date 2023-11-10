@@ -67,7 +67,6 @@ admin.site.register(Cart)
 
 
 
-
 class ReviewImageAdmin (admin.StackedInline):
     model = ReviewImage
 
