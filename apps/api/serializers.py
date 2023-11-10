@@ -96,6 +96,9 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     characteristics = serializers.SerializerMethodField()
@@ -122,24 +125,15 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     def get_resized_images(self, images):
         resized_images = []
         for image in images:
-            original_image = Image.open(image.image.path)
-
-            # Original size
             original_url = settings.BASE_URL + image.image.url
 
-            # middle
-            middle_image = original_image.resize((original_image.width // 2, original_image.height // 2))
-            middle_io = BytesIO()
-            middle_image.save(middle_io, format='PNG')
-            middle_io.seek(0)
-            middle_url = self.save_resized_image(image, middle_io)
+            # Resize the image with a middle resolution
+            middle_image = self.resize_image(image.image, 2)
+            middle_url = self.save_resized_image(image, middle_image)
 
-            # low
-            low_image = original_image.resize((original_image.width // 4, original_image.height // 4))
-            low_io = BytesIO()
-            low_image.save(low_io, format='PNG')
-            low_io.seek(0)
-            low_url = self.save_resized_image(image, low_io)
+            # Resize the image with a low resolution
+            low_image = self.resize_image(image.image, 4)
+            low_url = self.save_resized_image(image, low_image)
 
             resized_images.append({
                 'original': original_url,
@@ -149,9 +143,24 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
         return resized_images
 
-    def save_resized_image(self, image_instance, resized_io):
-        image_instance.image.save(image_instance.image.name, ContentFile(resized_io.read()), save=False)
+    def resize_image(self, original_image, factor):
+        # Open the original image using PIL
+        pil_image = Image.open(original_image.path)
 
+        # Resize the image
+        resized_image = pil_image.resize(
+            (pil_image.width // factor, pil_image.height // factor)
+        )
+
+        # Save the resized image to BytesIO
+        output_io = BytesIO()
+        resized_image.save(output_io, format='PNG')
+        output_io.seek(0)
+        return output_io
+
+    def save_resized_image(self, image_instance, resized_io):
+        # Save the resized image content to the existing image field
+        image_instance.image.save(f'resized_{image_instance.image.name}', ContentFile(resized_io.read()), save=False)
         return settings.BASE_URL + image_instance.image.url
 
     def get_rating(self, obj):
@@ -160,6 +169,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             return round(average_rating, 1)
         else:
             return None
+
+
 
 
 
