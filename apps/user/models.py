@@ -42,8 +42,8 @@ def save_user_profile(sender, instance, **kwargs):
 
 
 
-
-
+def review_image_path(instance, filename):
+    return f'review_images/{instance.review.product.id}/review_{instance.review.user.username}/{filename}'
 
 
 class Review(models.Model):
@@ -56,7 +56,7 @@ class Review(models.Model):
     def save(self, *args, **kwargs):
         super(Review, self).save(*args, **kwargs)
 
-        # Добавьте отзыв к отзывам о продукте
+
         if self.product:
             self.product.reviews.add(self)
 
@@ -65,7 +65,7 @@ class Review(models.Model):
 
 class ReviewImage(models.Model):
     review = models.ForeignKey(Review, related_name='images', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='review_images/')
+    image = models.ImageField(upload_to=review_image_path)
 
     def __str__(self):
         return f"Image for  {self.review}"

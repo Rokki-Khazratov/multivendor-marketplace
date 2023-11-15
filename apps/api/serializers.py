@@ -16,8 +16,8 @@ from django.core.files.base import ContentFile
 
 
 
+
 class ReviewSerializer(serializers.ModelSerializer):
-    # user_name:
     class Meta:
         model = Review
         fields = '__all__'
@@ -49,44 +49,36 @@ class ProductCharacteristicSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
     discount_price = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'seller', 'category', 'image', 'price','discount_price', 'rating')
+        fields = ('id', 'name', 'seller', 'category', 'images', 'price', 'discount_price', 'rating')
 
-    def get_image(self, obj):
-        image = None
-        for characteristic in obj.productcharacteristic_set.all():
-            images = characteristic.characteristicimage_set.all()
-            if images:
-                image = settings.BASE_URL + images[0].image.url
-                break
-        return image
+    def get_images(self, obj):
+        if obj.productcharacteristic_set.exists():
+            first_characteristic = obj.productcharacteristic_set.first()
+            return [settings.BASE_URL + image.image.url for image in first_characteristic.images.all()]
 
     def get_price(self, obj):
-        price = None
-        for characteristic in obj.productcharacteristic_set.all():
-            price = characteristic.price
-            break
-        return price
+        if obj.productcharacteristic_set.exists():
+            return obj.productcharacteristic_set.first().price
+        return None
 
     def get_discount_price(self, obj):
-        discount_price = None
-        for characteristic in obj.productcharacteristic_set.all():
-            discount_price = characteristic.discount_price
-            break
-        return discount_price
+        if obj.productcharacteristic_set.exists():
+            return obj.productcharacteristic_set.first().discount_price
+        return None
 
     def get_rating(self, obj):
         if obj.reviews.exists():
             average_rating = obj.reviews.aggregate(Avg('rating'))['rating__avg']
             return round(average_rating, 1)
-        else:
-            return None
+        return None
+
 
 
 
@@ -95,10 +87,6 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 
-
-from PIL import Image
-from io import BytesIO
-from django.core.files.base import ContentFile
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     characteristics = serializers.SerializerMethodField()
@@ -127,11 +115,9 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         for image in images:
             original_url = settings.BASE_URL + image.image.url
 
-            # Resize the image with a middle resolution
             middle_image = self.resize_image(image.image, 2)
             middle_url = self.save_resized_image(image, middle_image)
 
-            # Resize the image with a low resolution
             low_image = self.resize_image(image.image, 4)
             low_url = self.save_resized_image(image, low_image)
 
@@ -144,22 +130,18 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         return resized_images
 
     def resize_image(self, original_image, factor):
-        # Open the original image using PIL
         pil_image = Image.open(original_image.path)
 
-        # Resize the image
         resized_image = pil_image.resize(
             (pil_image.width // factor, pil_image.height // factor)
         )
 
-        # Save the resized image to BytesIO
         output_io = BytesIO()
         resized_image.save(output_io, format='PNG')
         output_io.seek(0)
         return output_io
 
     def save_resized_image(self, image_instance, resized_io):
-        # Save the resized image content to the existing image field
         image_instance.image.save(f'resized_{image_instance.image.name}', ContentFile(resized_io.read()), save=False)
         return settings.BASE_URL + image_instance.image.url
 
@@ -213,8 +195,6 @@ class FavoritesSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()  # Custom field for user data
-    images = serializers.SerializerMethodField()  # Custom field for image URLs
 
     class Meta:
         model = Review
@@ -224,8 +204,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         return f"{obj.user.first_name} {obj.user.last_name}"
 
     def get_images(self, obj):
-        # Assuming you have a related field 'images' on the Review model, adjust this accordingly
-        image_urls = [settings.BASE_URL + image.image.url for image in obj.images.all()]  # Adjust for your image field
         return image_urls
 
 

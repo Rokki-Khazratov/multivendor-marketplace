@@ -57,5 +57,4 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
 
     path('docs/', DocumentationSectionList.as_view(), name='documentation-api'),
-
 ]

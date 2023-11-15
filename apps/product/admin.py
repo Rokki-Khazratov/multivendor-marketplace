@@ -50,14 +50,10 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Seller)
 class SellerAdmin(admin.ModelAdmin):
-    list_display = ['store_name','id', 'phone_number']
-    # list_filter = ['category']
-    search_fields = ['name', 'phone_number']
-    # exclude = ['handle']
+    list_display = ['store_name', 'id', 'phone_number']
+    search_fields = ['store_name', 'phone_number']
     list_per_page = 20
 
-    class Meta:
-        model = Seller
 
 
 admin.site.register(ParentCategory)
