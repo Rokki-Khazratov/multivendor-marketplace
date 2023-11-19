@@ -117,12 +117,15 @@ USE_I18N = True
 
 USE_TZ = True
 
-APPEND_SLASH = False
+
+DEFAULT_FILE_STORAGE = 'core.storage_backends.CustomStorage'
+
+APPEND_SLASH = True
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Настройки для обработки статических файлов (если еще не установлены)
+
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 

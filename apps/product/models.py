@@ -77,6 +77,7 @@ class ProductCharacteristic(models.Model):
 class CharacteristicImage(models.Model):
     characteristic = models.ForeignKey(ProductCharacteristic, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to=characteristic_image_path)
+    
 
     def __str__(self):
         return f"Image for {self.characteristic.name}"
