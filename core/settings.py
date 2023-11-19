@@ -122,8 +122,8 @@ DEFAULT_FILE_STORAGE = 'core.storage_backends.CustomStorage'
 
 APPEND_SLASH = True
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/storage/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'storage')
 
 
 STATIC_URL = '/static/'

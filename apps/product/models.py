@@ -59,28 +59,27 @@ class Product(models.Model):
 
     #     super(Product, self).save(*args, **kwargs)
 
+
 class ProductCharacteristic(models.Model):
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
-    discount_price = models.DecimalField(max_digits=10, decimal_places=2,null=True)
+    discount_price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2) 
-    product = models.ForeignKey(Product,on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField(null=True, blank=True)
+    images = models.ManyToManyField('CharacteristicImage', related_name='characteristics',blank=True)
 
     def __str__(self):
         return f"{self.name}: {self.value}"
 
-
-
-
-
 class CharacteristicImage(models.Model):
-    characteristic = models.ForeignKey(ProductCharacteristic, related_name='images', on_delete=models.CASCADE)
+    characteristic = models.ForeignKey(ProductCharacteristic, related_name='characteristic_images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to=characteristic_image_path)
-    
 
     def __str__(self):
         return f"Image for {self.characteristic.name}"
+
+
 
 
 
