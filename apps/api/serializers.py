@@ -22,8 +22,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = '__all__'
 
-
-
 class CharacteristicImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CharacteristicImage
@@ -58,10 +56,10 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('id', 'name', 'seller', 'category', 'images', 'price', 'discount_price', 'rating')
 
-    # def get_images(self, obj):
-    #     if obj.productcharacteristic_set.exists():
-    #         first_characteristic = obj.productcharacteristic_set.first()
-    #         return [settings.BASE_URL + image.image.url for image in first_characteristic.images.all()]
+    def get_images(self, obj):
+        if obj.productcharacteristic_set.exists():
+            first_characteristic = obj.productcharacteristic_set.first()
+            return [settings.BASE_URL + image.image.url for image in first_characteristic.images.all()]
 
     def get_price(self, obj):
         if obj.productcharacteristic_set.exists():
@@ -212,17 +210,17 @@ class FavoritesSerializer(serializers.ModelSerializer):
         fields = ['user', 'favorite_products']
 
 
-class ReviewSerializer(serializers.ModelSerializer):
+# class ReviewSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = Review
-        fields = ['id', 'rating', 'info', 'created_at', 'user', 'product', 'images']
+#     class Meta:
+#         model = Review
+#         fields = ['id', 'rating', 'info', 'created_at', 'user', 'product', 'images']
 
-    def get_user(self, obj):
-        return f"{obj.user.first_name} {obj.user.last_name}"
+#     def get_user(self, obj):
+#         return f"{obj.user.first_name} {obj.user.last_name}"
 
-    def get_images(self, obj):
-        return image_urls
+#     def get_images(self, obj):
+#         return image_urls
 
 
 class ParentCategorySerializer(serializers.ModelSerializer):
