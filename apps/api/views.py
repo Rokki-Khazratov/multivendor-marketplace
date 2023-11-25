@@ -1,10 +1,10 @@
-from rest_framework.generics import ListCreateAPIView,CreateAPIView, RetrieveUpdateDestroyAPIView,ListAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView,ListAPIView
 from rest_framework import filters
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 from apps.product.models import ProductCharacteristic
 from django.db.models import F, Sum
 from django.db.models import OuterRef, Subquery
@@ -13,6 +13,10 @@ from django.db.models import OuterRef, Subquery
 from .serializers import *
 from .models import *
 
+class CustomPagination(PageNumberPagination):
+    page_size = 20  #the number of items per page
+    page_size_query_param = 'page_size'
+    max_page_size = 2000
 
 class DocumentationSectionList(ListAPIView):
     serializer_class = DocumentationSectionSerializer
@@ -25,6 +29,7 @@ class ProductListCreateView(ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = [filters.OrderingFilter] 
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         queryset = Product.objects.all()
