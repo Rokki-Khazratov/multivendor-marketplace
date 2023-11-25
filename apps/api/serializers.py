@@ -288,7 +288,7 @@ class SellerSerializer(serializers.ModelSerializer):
         model = Seller
         fields = (
             'id', 'premium_tariff', 'store_name', 'address',
-            'phone_number', 'created_at', 'updated_at', 'user'
+            'phone_number', 'created_at', 'updated_at', 'user','avatarka','background'
         )
 
 

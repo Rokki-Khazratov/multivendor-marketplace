@@ -24,7 +24,9 @@ class Seller(SellerBaseModel):
         (2, 'Standard'),
         (3, 'Premium'),
     ]
-    premium_tariff = models.CharField(max_length=10, choices=PREMIUM_TARIFF_CHOICES, default='basic')
+    premium_tariff = models.IntegerField(choices=PREMIUM_TARIFF_CHOICES, default=1)
+    avatarka = models.ImageField(upload_to="sellers_avatarka/",blank=True, null=True)
+    background = models.ImageField(upload_to="sellers_background/",blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

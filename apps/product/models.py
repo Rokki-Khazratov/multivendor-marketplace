@@ -25,7 +25,7 @@ class ParentCategory(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
-    parent = models.ForeignKey(ParentCategory, null=True, blank=True,on_delete=models.CASCADE)
+    parent = models.ForeignKey(ParentCategory, null=True, blank=True,on_delete=models.DO_NOTHING)
 
     def __str__(self):
         return self.name
@@ -37,7 +37,7 @@ class Category(models.Model):
 #! Product's things ----------------------------
 class Product(models.Model):
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.DO_NOTHING, null=True, blank=True)
     name = models.CharField(max_length=255)
     description = models.TextField()
     handle = models.SlugField(unique=True) 
