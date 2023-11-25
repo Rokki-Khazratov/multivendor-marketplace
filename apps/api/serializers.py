@@ -4,7 +4,7 @@ from rest_framework import serializers
 from apps.product.models import Cart, CartItem, Category, ParentCategory,Product,ProductCharacteristic, CharacteristicImage
 from apps.seller.models import Seller,SellerApplication
 from .models import DocumentationSection
-from apps.user.models import Favorites, Review
+from apps.user.models import Favorites, Review, ReviewImage
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 from apps.user.models import UserProfile
@@ -14,13 +14,70 @@ from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile  
 
+from rest_framework import serializers
+from PIL import Image
+import os
+
+# class ReviewSerializer(serializers.ModelSerializer):
+#     user = serializers.SerializerMethodField()
+#     images = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = Review
+#         fields = ['id', 'rating', 'info', 'created_at', 'user', 'product', 'images']
+
+#     def get_user(self, obj):
+#         return f"{obj.user.first_name} {obj.user.last_name}"
+
+#     def get_images(self, obj):
+#         if obj.images.exists():
+#             image_path = obj.images.first().image.path
+#             low_resolution_path = self.get_low_resolution_path(image_path)
+#             return low_resolution_path
+#         return None
+
+#     def get_low_resolution_path(self, original_path):
+#         low_resolution_path = self.get_low_resolution_filename(original_path)
+
+#         # Check if the low-resolution image already exists
+#         if not os.path.exists(low_resolution_path):
+#             img = Image.open(original_path)
+#             img.thumbnail((100, 100))
+#             img.save(low_resolution_path)
+
+#         return low_resolution_path
+
+#     def get_low_resolution_filename(self, original_path):
+#         # Create a unique filename for the low-resolution image
+#         base_name, extension = os.path.splitext(os.path.basename(original_path))
+#         low_resolution_filename = f"low_resolution_{base_name}{extension}"
+#         low_resolution_path = os.path.join("/storage/review_images/7/review_rokki_user", low_resolution_filename)
+#         return low_resolution_path
 
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
+
     class Meta:
         model = Review
-        fields = '__all__'
+        fields = ['id', 'rating', 'info', 'created_at', 'user', 'product', 'images']
+
+    def get_user(self, obj):
+        return f"{obj.user.first_name} {obj.user.last_name}"
+
+    def get_images(self, obj):
+        if obj.images.exists():
+            image_urls = [settings.BASE_URL + image.image.url for image in obj.images.all()]
+            return image_urls
+        return []
+
+
+class ReviewImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReviewImage
+        fields = ['image']
 
 class CharacteristicImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -39,11 +96,6 @@ class ProductCharacteristicSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCharacteristic
         fields = '__all__'
-
-
-
-
-
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -208,19 +260,6 @@ class FavoritesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorites
         fields = ['user', 'favorite_products']
-
-
-# class ReviewSerializer(serializers.ModelSerializer):
-
-#     class Meta:
-#         model = Review
-#         fields = ['id', 'rating', 'info', 'created_at', 'user', 'product', 'images']
-
-#     def get_user(self, obj):
-#         return f"{obj.user.first_name} {obj.user.last_name}"
-
-#     def get_images(self, obj):
-#         return image_urls
 
 
 class ParentCategorySerializer(serializers.ModelSerializer):

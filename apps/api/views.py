@@ -29,12 +29,18 @@ class ProductListCreateView(ListCreateAPIView):
     def get_queryset(self):
         queryset = Product.objects.all()
         category_id = self.request.query_params.get('category')
+
         if category_id:
             queryset = queryset.filter(category_id=category_id)
 
         name = self.request.query_params.get('name')
         if name:
             queryset = queryset.filter(name__icontains=name)
+
+        seller = self.request.query_params.get('seller')
+        if seller:
+            queryset = queryset.filter(seller=seller)
+
 
         price_range = self.request.query_params.get('price')
         if price_range:
