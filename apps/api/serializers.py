@@ -273,16 +273,16 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class SellerSerializer(serializers.ModelSerializer):
-    def map_premium_tariff(self, obj):
-        if obj.premium_tariff == 'basic':
-            return 1
-        elif obj.premium_tariff == 'standard':
-            return 2
-        elif obj.premium_tariff == 'premium':
-            return 3
-        return None
+    # def map_premium_tariff(self, obj):
+    #     if obj.premium_tariff == 'basic':
+    #         return 1
+    #     elif obj.premium_tariff == 'standard':
+    #         return 2
+    #     elif obj.premium_tariff == 'premium':
+    #         return 3
+    #     return None
 
-    premium_tariff = serializers.SerializerMethodField(method_name='map_premium_tariff')
+    # premium_tariff = serializers.SerializerMethodField(method_name='map_premium_tariff')
 
     class Meta:
         model = Seller
