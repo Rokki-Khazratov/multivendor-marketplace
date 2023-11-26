@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
+# from rest_framework.pagination import PageNumberPagination
 from apps.product.models import ProductCharacteristic
 from django.db.models import F, Sum
 from django.db.models import OuterRef, Subquery
@@ -13,10 +13,21 @@ from django.db.models import OuterRef, Subquery
 from .serializers import *
 from .models import *
 
-class CustomPagination(PageNumberPagination):
-    page_size = 20  #the number of items per page
-    page_size_query_param = 'page_size'
-    max_page_size = 2000
+class YourProductView(ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        print(f"Response status code: {response.status_code}")
+
+        return response
+
+
+# class CustomPagination(PageNumberPagination):
+#     page_size = 20  #the number of items per page
+#     page_size_query_param = 'page_size'
+#     max_page_size = 2000
 
 class DocumentationSectionList(ListAPIView):
     serializer_class = DocumentationSectionSerializer
@@ -29,7 +40,45 @@ class ProductListCreateView(ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = [filters.OrderingFilter] 
-    pagination_class = CustomPagination
+    # pagination_class = CustomPagination
+
+    # def get_queryset(self):
+    #     queryset = Product.objects.all()
+    #     category_id = self.request.query_params.get('category')
+
+    #     if category_id:
+    #         queryset = queryset.filter(category_id=category_id)
+
+    #     name = self.request.query_params.get('name')
+    #     if name:
+    #         queryset = queryset.filter(name__icontains=name)
+
+    #     seller = self.request.query_params.get('seller')
+    #     if seller:
+    #         queryset = queryset.filter(seller=seller)
+
+
+    #     price_range = self.request.query_params.get('price')
+    #     if price_range:
+    #         min_price, max_price = price_range.split('-')
+    #         queryset = queryset.filter(price__gte=min_price, price__lte=max_price)
+
+    #     characteristic_value = self.request.query_params.get('characteristic')
+    #     if characteristic_value:
+    #         queryset = queryset.filter(characteristics__value=characteristic_value)
+    #         queryset = queryset.annotate(
+    #             characteristic_price=F('characteristics__price')
+    #         ).order_by('characteristic_price')
+
+    #     # subquery = ProductImage.objects.filter(product=OuterRef('pk')).order_by('characteristic_id').values('image')[:1]
+    #     # queryset = queryset.annotate(main_image=Subquery(subquery))
+
+    #     return queryset
+    
+    # def list(self, request, *args, **kwargs):
+    #     response = super().list(request, *args, **kwargs)
+    #     print(f"Serializer data: {response.data}")
+    #     return response
 
     def get_queryset(self):
         queryset = Product.objects.all()
@@ -50,19 +99,7 @@ class ProductListCreateView(ListCreateAPIView):
         price_range = self.request.query_params.get('price')
         if price_range:
             min_price, max_price = price_range.split('-')
-            queryset = queryset.filter(price__gte=min_price, price__lte=max_price)
 
-        characteristic_value = self.request.query_params.get('characteristic')
-        if characteristic_value:
-            queryset = queryset.filter(characteristics__value=characteristic_value)
-            queryset = queryset.annotate(
-                characteristic_price=F('characteristics__price')
-            ).order_by('characteristic_price')
-
-        # subquery = ProductImage.objects.filter(product=OuterRef('pk')).order_by('characteristic_id').values('image')[:1]
-        # queryset = queryset.annotate(main_image=Subquery(subquery))
-
-        return queryset
 
 class ProductRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()

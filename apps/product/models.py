@@ -10,8 +10,11 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 
+# def characteristic_image_path(instance, filename):
+#     return f'products/{instance.characteristic.product.seller.store_name}-{instance.characteristic.product.id}/{filename}'
 def characteristic_image_path(instance, filename):
-    return f'products/{instance.characteristic.product.seller.store_name}-{instance.characteristic.product.id}/{filename}'
+    product = instance.characteristic.product
+    return f'products/{product.seller.store_name}-{product.id}/{filename}'
 
 
 
@@ -59,7 +62,7 @@ class Product(models.Model):
 
     #     super(Product, self).save(*args, **kwargs)
 
-
+    
 class ProductCharacteristic(models.Model):
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
@@ -67,10 +70,11 @@ class ProductCharacteristic(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2) 
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField(null=True, blank=True)
-    images = models.ManyToManyField('CharacteristicImage', related_name='characteristics',blank=True)
+    images = models.ManyToManyField('CharacteristicImage', related_name='product_characteristics', blank=True)
 
     def __str__(self):
         return f"{self.name}: {self.value}"
+
 
 class CharacteristicImage(models.Model):
     characteristic = models.ForeignKey(ProductCharacteristic, related_name='characteristic_images', on_delete=models.CASCADE)
@@ -78,6 +82,8 @@ class CharacteristicImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.characteristic.name}"
+
+
 
 
 
@@ -103,7 +109,7 @@ class CharacteristicQuantity(models.Model):
 
 
 
-class Cart(models.Model):
+class Cart(models.Model): #cart.total_price
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

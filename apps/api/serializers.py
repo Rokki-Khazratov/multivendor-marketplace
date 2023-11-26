@@ -82,7 +82,7 @@ class ReviewImageSerializer(serializers.ModelSerializer):
 class CharacteristicImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CharacteristicImage
-        fields = '__all__'
+        fields = ("id","image")
 
 
 class OneImageSerializer(serializers.ModelSerializer):
@@ -99,20 +99,25 @@ class ProductCharacteristicSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    images = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
     discount_price = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'seller', 'category', 'images', 'price', 'discount_price', 'rating')
+        fields = ('id', 'name', 'seller', 'category', 'image', 'price', 'discount_price', 'rating')
 
-    def get_images(self, obj):
-        if obj.productcharacteristic_set.exists():
-            first_characteristic = obj.productcharacteristic_set.first()
-            return [settings.BASE_URL + image.image.url for image in first_characteristic.images.all()]
 
+    def get_image(self, obj):
+        # Use Subquery to get the first image URL directly in the query
+        first_image_url = CharacteristicImage.objects.filter(
+            characteristic__product=obj
+        ).order_by('id').values('image').first()
+
+        return settings.BASE_URL + 'storage/' + first_image_url['image'] if first_image_url else None
+
+        
     def get_price(self, obj):
         if obj.productcharacteristic_set.exists():
             return obj.productcharacteristic_set.first().price

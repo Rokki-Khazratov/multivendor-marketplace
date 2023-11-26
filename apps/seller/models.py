@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 
 
 def validate_seller_name(value):
-    invalid_chars = set("!'\"@#$%^&*()_+=<>?{}[]|\\;:,~`")
+    invalid_chars = set("!'\"@#$%^&*()_+=<>?{}[]|\\;:,~`" and " ")
     if any(char in invalid_chars for char in value):
         raise ValidationError("Invalid character in seller name")
 
