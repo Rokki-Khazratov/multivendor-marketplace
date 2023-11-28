@@ -4,21 +4,21 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
-from apps.product.models import Cart,CartItem, ProductCharacteristic
+from apps.product.models import CartItem, ProductCharacteristic
 from .models import *
-from .models import Cart, CartItem
-from apps.api.serializers import CartSerializer, CartItemSerializer
+from .models import  CartItem
+from apps.api.serializers import  CartItemSerializer
 
 
-class CartListCreateView(generics.ListCreateAPIView):
-    queryset = Cart.objects.all()
-    serializer_class = CartSerializer
-    # permission_classes = [IsAuthenticated]
+# class CartListCreateView(generics.ListCreateAPIView):
+#     queryset = Cart.objects.all()
+#     serializer_class = CartSerializer
+#     # permission_classes = [IsAuthenticated]
 
-class CartDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Cart.objects.all()
-    serializer_class = CartSerializer
-    # permission_classes = [IsAuthenticated]
+# class CartDetailView(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = Cart.objects.all()
+#     serializer_class = CartSerializer
+#     # permission_classes = [IsAuthenticated]
 
 class CartItemCreateView(generics.ListCreateAPIView):
     queryset = CartItem.objects.all()

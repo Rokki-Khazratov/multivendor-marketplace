@@ -1,7 +1,7 @@
 from django.forms import ImageField
 from core import settings
 from rest_framework import serializers
-from apps.product.models import Cart, CartItem, Category, ParentCategory,Product,ProductCharacteristic, CharacteristicImage
+from apps.product.models import CartItem, Category, ParentCategory,Product,ProductCharacteristic, CharacteristicImage
 from apps.seller.models import Seller,SellerApplication
 from .models import DocumentationSection
 from apps.user.models import Favorites, Review, ReviewImage
@@ -99,6 +99,8 @@ class ProductCharacteristicSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    seller = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
     discount_price = serializers.SerializerMethodField()
@@ -106,7 +108,24 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'seller', 'category', 'image', 'price', 'discount_price', 'rating')
+        fields = ('id', 'name','is_published', 'seller', 'category', 'image', 'price', 'discount_price', 'rating')
+
+    def get_seller(self, obj):
+        seller = obj.seller
+        return {
+            "id": seller.id,
+            "store_name": seller.store_name,
+            # "created_at": seller.created_at,
+            "premium_tariff": seller.premium_tariff,
+        }
+
+    def get_category(self, obj):
+        category = obj.category
+        return {
+            "id": category.id,
+            "name": category.name,
+            "parent": category.parent.name,
+        }
 
 
     def get_image(self, obj):
@@ -233,13 +252,13 @@ class CartItemSerializer(serializers.ModelSerializer):
         model = CartItem
         fields = '__all__'
 
-class CartSerializer(serializers.ModelSerializer):
-    cart_items = CartItemSerializer(many=True, read_only=True)
-    total_price = serializers.DecimalField(source='get_total_price', max_digits=10, decimal_places=2, read_only=True)
+# class CartSerializer(serializers.ModelSerializer):
+#     cart_items = CartItemSerializer(many=True, read_only=True)
+#     total_price = serializers.DecimalField(source='get_total_price', max_digits=10, decimal_places=2, read_only=True)
 
-    class Meta:
-        model = Cart
-        fields = '__all__'
+#     class Meta:
+#         model = Cart
+#         fields = '__all__'
 
 
 
@@ -302,6 +321,8 @@ class DocumentationSectionSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    # cart_items = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = '__all__'
@@ -309,6 +330,9 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True},
         }
+    # def get_cart_items (self,obj):
+    #     return obj.
+
 
     def validate(self, data):
         username = data.get('username')

@@ -42,44 +42,6 @@ class ProductListCreateView(ListCreateAPIView):
     filter_backends = [filters.OrderingFilter] 
     # pagination_class = CustomPagination
 
-    # def get_queryset(self):
-    #     queryset = Product.objects.all()
-    #     category_id = self.request.query_params.get('category')
-
-    #     if category_id:
-    #         queryset = queryset.filter(category_id=category_id)
-
-    #     name = self.request.query_params.get('name')
-    #     if name:
-    #         queryset = queryset.filter(name__icontains=name)
-
-    #     seller = self.request.query_params.get('seller')
-    #     if seller:
-    #         queryset = queryset.filter(seller=seller)
-
-
-    #     price_range = self.request.query_params.get('price')
-    #     if price_range:
-    #         min_price, max_price = price_range.split('-')
-    #         queryset = queryset.filter(price__gte=min_price, price__lte=max_price)
-
-    #     characteristic_value = self.request.query_params.get('characteristic')
-    #     if characteristic_value:
-    #         queryset = queryset.filter(characteristics__value=characteristic_value)
-    #         queryset = queryset.annotate(
-    #             characteristic_price=F('characteristics__price')
-    #         ).order_by('characteristic_price')
-
-    #     # subquery = ProductImage.objects.filter(product=OuterRef('pk')).order_by('characteristic_id').values('image')[:1]
-    #     # queryset = queryset.annotate(main_image=Subquery(subquery))
-
-    #     return queryset
-    
-    # def list(self, request, *args, **kwargs):
-    #     response = super().list(request, *args, **kwargs)
-    #     print(f"Serializer data: {response.data}")
-    #     return response
-
     def get_queryset(self):
         queryset = Product.objects.all()
         category_id = self.request.query_params.get('category')
@@ -99,6 +61,44 @@ class ProductListCreateView(ListCreateAPIView):
         price_range = self.request.query_params.get('price')
         if price_range:
             min_price, max_price = price_range.split('-')
+            queryset = queryset.filter(price__gte=min_price, price__lte=max_price)
+
+        characteristic_value = self.request.query_params.get('characteristic')
+        if characteristic_value:
+            queryset = queryset.filter(characteristics__value=characteristic_value)
+            queryset = queryset.annotate(
+                characteristic_price=F('characteristics__price')
+            ).order_by('characteristic_price')
+
+        # subquery = ProductImage.objects.filter(product=OuterRef('pk')).order_by('characteristic_id').values('image')[:1]
+        # queryset = queryset.annotate(main_image=Subquery(subquery))
+
+        return queryset
+    
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        print(f"Serializer data: {response.data}")
+        return response
+
+    # def get_queryset(self):
+    #     queryset = Product.objects.all()
+    #     category_id = self.request.query_params.get('category')
+
+    #     if category_id:
+    #         queryset = queryset.filter(category_id=category_id)
+
+    #     name = self.request.query_params.get('name')
+    #     if name:
+    #         queryset = queryset.filter(name__icontains=name)
+
+    #     seller = self.request.query_params.get('seller')
+    #     if seller:
+    #         queryset = queryset.filter(seller=seller)
+
+
+    #     price_range = self.request.query_params.get('price')
+    #     if price_range:
+    #         min_price, max_price = price_range.split('-')
 
 
 class ProductRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):

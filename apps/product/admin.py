@@ -59,7 +59,7 @@ class SellerAdmin(admin.ModelAdmin):
 admin.site.register(ParentCategory)
 admin.site.register(Category)
 admin.site.register(CharacteristicQuantity)
-admin.site.register(Cart)
+# admin.site.register(Cart)
 
 
 

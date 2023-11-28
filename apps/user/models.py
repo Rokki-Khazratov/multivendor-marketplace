@@ -2,7 +2,6 @@ from django.db import models
 
 from django.db import models
 from django.contrib.auth.models import User
-from apps.product.models import Product
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -13,7 +12,7 @@ from django.dispatch import receiver
 
 class Favorites(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    favorite_products = models.ManyToManyField(Product, blank=True)
+    favorite_products = models.ManyToManyField('product.Product', blank=True)
 
     def add_to_favorites(self, product):
         self.favorite_products.add(product)
@@ -50,13 +49,13 @@ def review_image_path(instance, filename):
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=0.0, validators=[MinValueValidator(0.0), MaxValueValidator(5.0)])
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey('product.Product', on_delete=models.CASCADE,related_name='products')
     info = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
+        from apps.product.models import Product  # Import inside the method
         super(Review, self).save(*args, **kwargs)
-
 
         if self.product:
             self.product.reviews.add(self)

@@ -27,8 +27,8 @@ urlpatterns = [
     path('reviews/', ReviewListCreateView.as_view(), name='review-list-create'),
     path('reviews/<int:pk>/', ReviewRetrieveUpdateDestroyView.as_view(), name='review-detail'),
 
-    path('carts/', CartListCreateView.as_view(), name='cart-list-create'),
-    path('carts/<int:pk>/', CartDetailView.as_view(), name='cart-detail'),
+    # path('carts/', CartListCreateView.as_view(), name='cart-list-create'),
+    # path('carts/<int:pk>/', CartDetailView.as_view(), name='cart-detail'),
     path('cartitems/', CartItemCreateView.as_view(), name='cart-item-create'),
     path('cartitems/<int:pk>/', CartItemDetailView.as_view(), name='cart-item-detail'),
 

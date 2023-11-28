@@ -1,11 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
-from apps.product.models import Cart, Product, ProductCharacteristic
+from apps.product.models import  Product, ProductCharacteristic
 
 
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    # cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     shipping_address = models.TextField()
     order_date = models.DateTimeField(auto_now_add=True)
 
