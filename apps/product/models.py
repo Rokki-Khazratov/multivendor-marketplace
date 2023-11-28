@@ -53,6 +53,10 @@ class Product(models.Model):
     def __str__(self):
         return self.name
     
+    @property
+    def display_seller_name(self):
+        return self.seller.store_name
+    
     # def save(self, *args, **kwargs):
     #     if self.reviews.count() > 0:
     #         total_rating = sum(review.rating for review in self.reviews.all())
@@ -109,7 +113,7 @@ class CharacteristicQuantity(models.Model):
 
 
 
-class Cart(models.Model): #cart.total_price
+class Cart(models.Model): 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

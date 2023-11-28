@@ -148,23 +148,11 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     characteristics = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
     reviews = ReviewSerializer(many=True)
+    seller_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = '__all__'
-
-    # def get_characteristics(self, obj):
-    #     characteristics = []
-    #     for characteristic in obj.productcharacteristic_set.all():
-    #         characteristic_data = {
-    #             'name': characteristic.name,
-    #             'value': characteristic.value,
-    #             'price': characteristic.price,
-    #             'discount_price': characteristic.discount_price,
-    #             'images': self.get_resized_images(characteristic.characteristicimage_set.all())
-    #         }
-    #         characteristics.append(characteristic_data)
-    #     return characteristics
 
     def get_characteristics(self, obj):
         characteristics = []
@@ -225,6 +213,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         else:
             return None
 
+    def get_seller_name(self,obj):
+        return obj.display_seller_name
 
 
 

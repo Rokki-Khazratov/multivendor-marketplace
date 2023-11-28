@@ -122,7 +122,7 @@ DEFAULT_FILE_STORAGE = 'core.storage_backends.CustomStorage'
 
 APPEND_SLASH = True
 
-MEDIA_URL = '/storage/'
+MEDIA_URL = 'storage/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'storage')
 
 
