@@ -50,6 +50,7 @@ class Product(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
     is_published = models.BooleanField(default=False)
 
     def __str__(self):
@@ -84,7 +85,7 @@ class ProductCharacteristic(models.Model):
 
 class CharacteristicImage(models.Model):
     characteristic = models.ForeignKey(ProductCharacteristic, related_name='characteristic_images', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to=characteristic_image_path)
+    image = models.ImageField(upload_to=characteristic_image_path,max_length=500)
 
     def __str__(self):
         return f"Image for {self.characteristic.name}"

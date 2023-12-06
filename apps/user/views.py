@@ -17,14 +17,44 @@ class LogoutView(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
+# class RegisterView(CreateAPIView):
+#     serializer_class = UserSerializer  
+
+#     def perform_create(self, serializer):
+#         user = serializer.save()
+#         user.set_password(serializer.validated_data['password'])
+#         user.save()
+#         return user
+
+
 class RegisterView(CreateAPIView):
     serializer_class = UserSerializer  
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = self.perform_create(serializer)
+
+        if user:
+            jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+            jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+
+            payload = jwt_payload_handler(user)
+            token = jwt_encode_handler(payload)
+
+            return Response({'token': token}, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
         user = serializer.save()
         user.set_password(serializer.validated_data['password'])
         user.save()
         return user
+
+
+
 
 class LoginView(APIView):
     def post(self, request):

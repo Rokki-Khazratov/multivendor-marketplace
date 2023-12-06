@@ -1,10 +1,11 @@
+from django.http import HttpResponseBadRequest
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView,ListAPIView
 from rest_framework import filters
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-# from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import PageNumberPagination
 from apps.product.models import ProductCharacteristic
 from django.db.models import F, Sum
 from django.db.models import OuterRef, Subquery
@@ -24,10 +25,10 @@ class YourProductView(ListCreateAPIView):
         return response
 
 
-# class CustomPagination(PageNumberPagination):
-#     page_size = 20  #the number of items per page
-#     page_size_query_param = 'page_size'
-#     max_page_size = 2000
+class CustomPagination(PageNumberPagination):
+    page_size = 20  #the number of items per page
+    page_size_query_param = 'page_size'
+    max_page_size = 2000
 
 class DocumentationSectionList(ListAPIView):
     serializer_class = DocumentationSectionSerializer
@@ -40,30 +41,43 @@ class ProductListCreateView(ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = [filters.OrderingFilter] 
-    # pagination_class = CustomPagination
+    pagination_class = CustomPagination
 
     def get_queryset(self):
         queryset = Product.objects.all()
-        category_id = self.request.query_params.get('category')
-
-        if category_id:
-            queryset = queryset.filter(category_id=category_id)
-
+        category_id = self.request.query_params.get('category_id')
         name = self.request.query_params.get('name')
+        seller = self.request.query_params.get('seller')
+        price_range = self.request.query_params.get('price')
+        characteristic_value = self.request.query_params.get('characteristic')
+
+        try:
+            print("try")
+            if category_id:
+                print("category_id exists:", category_id)
+                # Convert category_id to an actual Category instance
+                category_id = int(category_id)
+                category = Category.objects.get(id=category_id)
+                queryset = queryset.filter(category=category)
+                print("Category filtered:", queryset)
+            else:
+                print("else")
+        except ValueError:
+            print("error")
+            return HttpResponseBadRequest("Invalid category_id. Must be an integer.")
+
+
         if name:
             queryset = queryset.filter(name__icontains=name)
 
-        seller = self.request.query_params.get('seller')
         if seller:
             queryset = queryset.filter(seller=seller)
 
 
-        price_range = self.request.query_params.get('price')
         if price_range:
             min_price, max_price = price_range.split('-')
             queryset = queryset.filter(price__gte=min_price, price__lte=max_price)
 
-        characteristic_value = self.request.query_params.get('characteristic')
         if characteristic_value:
             queryset = queryset.filter(characteristics__value=characteristic_value)
             queryset = queryset.annotate(
@@ -75,35 +89,17 @@ class ProductListCreateView(ListCreateAPIView):
 
         return queryset
     
-    def list(self, request, *args, **kwargs):
-        response = super().list(request, *args, **kwargs)
-        print(f"Serializer data: {response.data}")
-        return response
-
-    # def get_queryset(self):
-    #     queryset = Product.objects.all()
-    #     category_id = self.request.query_params.get('category')
-
-    #     if category_id:
-    #         queryset = queryset.filter(category_id=category_id)
-
-    #     name = self.request.query_params.get('name')
-    #     if name:
-    #         queryset = queryset.filter(name__icontains=name)
-
-    #     seller = self.request.query_params.get('seller')
-    #     if seller:
-    #         queryset = queryset.filter(seller=seller)
-
-
-    #     price_range = self.request.query_params.get('price')
-    #     if price_range:
-    #         min_price, max_price = price_range.split('-')
+    # def list(self, request, *args, **kwargs):
+    #     response = super().list(request, *args, **kwargs)
+    #     print(f"Serializer data: {response.data}")
+    #     return response
 
 
 class ProductRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductDetailSerializer
+
+
 
 class CharacteristicImageListCreateView(ListCreateAPIView):
     queryset = CharacteristicImage.objects.all()

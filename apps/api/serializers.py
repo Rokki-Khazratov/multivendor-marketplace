@@ -108,7 +108,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('id', 'name','is_published', 'seller', 'category', 'image', 'price', 'discount_price', 'rating')
+        fields = ('id', 'name','is_published','updated_at', 'seller', 'category', 'image', 'price', 'discount_price', 'rating')
 
     def get_seller(self, obj):
         seller = obj.seller
@@ -320,19 +320,25 @@ class DocumentationSectionSerializer(serializers.ModelSerializer):
 
 
 
+
+
+
+
+class UserAbstract(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['name', 'phone_number']
+
+
 class UserSerializer(serializers.ModelSerializer):
-    # cart_items = serializers.SerializerMethodField()
+    profile = UserAbstract(required=False)
 
     class Meta:
         model = User
-        fields = '__all__'
-
+        fields = ['id', 'username', 'password', 'profile']
         extra_kwargs = {
             'password': {'write_only': True},
         }
-    # def get_cart_items (self,obj):
-    #     return obj.
-
 
     def validate(self, data):
         username = data.get('username')
@@ -343,9 +349,24 @@ class UserSerializer(serializers.ModelSerializer):
 
         if len(password) < 8:
             raise ValidationError('Пароль должен содержать более 8 символов.')
-
-
         return data
+
+    def create(self, validated_data):
+        profile_data = validated_data.pop('profile', {})
+        user = User.objects.create_user(**validated_data)
+
+        # Check if a UserProfile already exists for the user
+        profile, created = UserProfile.objects.get_or_create(user=user, defaults=profile_data)
+
+        # If the profile already existed, update its fields
+        if not created:
+            for key, value in profile_data.items():
+                setattr(profile, key, value)
+            profile.save()
+
+        return user
+    
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user_profile = UserSerializer(source='user')
