@@ -25,8 +25,8 @@ class UserProfile(models.Model):
     name = models.CharField(max_length=100,null=True, blank=True)
     phone_number = models.CharField(max_length=15,null=True, blank=True)
 
-    def __str__(self) :
-        return self.name
+    def __str__(self):
+        return self.name or f"UserProfile-{self.id}"
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

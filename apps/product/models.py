@@ -106,9 +106,10 @@ class CharacteristicQuantity(models.Model):
     cart_item = models.ForeignKey('CartItem', on_delete=models.CASCADE)
     characteristic = models.ForeignKey(ProductCharacteristic, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=0)
-    
+
     def __str__(self):
         return f"{self.cart_item} - {self.characteristic.name} : {self.quantity}"
+
 
 
 
@@ -141,10 +142,10 @@ class CharacteristicQuantity(models.Model):
 #         return f"{self.user.username}'s cart"
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='cart_items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
-    characteristic_quantity = models.ForeignKey(CharacteristicQuantity, null=True, blank=True, on_delete=models.CASCADE)
+    characteristics = models.ManyToManyField(ProductCharacteristic, through='CharacteristicQuantity')
 
     def __str__(self):
-        return f"Cart Item for Cart {self.cart.id}"   
+        return f"Cart Item for Cart {self.user_profile.id}"   

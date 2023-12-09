@@ -365,11 +365,115 @@ class UserSerializer(serializers.ModelSerializer):
             profile.save()
 
         return user
-    
+
+
+
+
+
+
+
+
+
+# class CharacteristicImageSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = CharacteristicImage
+#         fields = '__all__'
+
+
+# class CharacteristicSerializer(serializers.ModelSerializer):
+#     image = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = ProductCharacteristic
+#         fields = ['name', 'value', 'price', 'discount_price', 'image']
+
+#     def get_image(self, obj):
+#         first_image = obj.images.first()
+#         return first_image.image.url if first_image else None
+
+
+# class CartItemSerializer(serializers.ModelSerializer):
+#     characteristics = CharacteristicSerializer(many=True, read_only=True, required=False)
+
+#     class Meta:
+#         model = CartItem
+#         fields = ['id', 'quantity', 'product', 'characteristics']
+
+
+
+# class UserProfileSerializer(serializers.ModelSerializer):
+#     user_profile = UserSerializer(source='user')
+#     cart_items = CartItemSerializer(many=True, read_only=True)
+
+#     class Meta:
+#         model = UserProfile
+#         fields = '__all__'
+
+#     def to_representation(self, instance):
+#         ret = super().to_representation(instance)
+#         for cart_item in ret['cart_items']:
+#             cart_item_id = cart_item.get('id')
+#             if cart_item_id:
+#                 try:
+#                     cart_item_obj = CartItem.objects.get(id=cart_item_id)
+#                     characteristics = cart_item_obj.characteristics.all()
+#                     if characteristics:
+#                         cart_item['characteristics'] = CharacteristicSerializer(characteristics, many=True).data
+#                 except CartItem.DoesNotExist:
+#                     pass
+#         return ret
+
+
+
+class CharacteristicImageSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField()
+
+    class Meta:
+        model = CharacteristicImage
+        fields = ['image']
+
+
+class CharacteristicSerializer(serializers.ModelSerializer):
+    # image = CharacteristicImageSerializer(source='images.first', read_only=True)
+
+    class Meta:
+        model = ProductCharacteristic
+        fields = ['id','name', 'value', 'price', 'discount_price'
+                #   , 'image'
+                  ]
+
+
+class CartItemSerializer(serializers.ModelSerializer):
+    characteristics = CharacteristicSerializer(many=True, read_only=True, required=False)
+
+    class Meta:
+        model = CartItem
+        fields = ['id', 'quantity', 'product', 'characteristics']
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user_profile = UserSerializer(source='user')
+    cart_items = CartItemSerializer(many=True, read_only=True)
+
     class Meta:
         model = UserProfile
         fields = '__all__'
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        for cart_item in ret['cart_items']:
+            cart_item_id = cart_item.get('id')
+            if cart_item_id:
+                try:
+                    cart_item_obj = CartItem.objects.get(id=cart_item_id)
+                    characteristics = cart_item_obj.characteristics.all()
+                    if characteristics:
+                        cart_item['characteristics'] = CharacteristicSerializer(characteristics, many=True).data
+                except CartItem.DoesNotExist:
+                    pass
+        return ret
+
+
+
+
+

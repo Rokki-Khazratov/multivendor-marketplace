@@ -29,11 +29,16 @@ urlpatterns = [
 
     # path('carts/', CartListCreateView.as_view(), name='cart-list-create'),
     # path('carts/<int:pk>/', CartDetailView.as_view(), name='cart-detail'),
-    path('cartitems/', CartItemCreateView.as_view(), name='cart-item-create'),
-    path('cartitems/<int:pk>/', CartItemDetailView.as_view(), name='cart-item-detail'),
+    # path('cartitems/', CartItemCreateView.as_view(), name='cart-item-create'),
+    # path('cartitems/<int:pk>/', CartItemDetailView.as_view(), name='cart-item-detail'),
+    # path('product/add-to-favorites/', AddToFavoritesView.as_view(), name='add-to-favorites'),
+    # path('product/remove-from-favorites/', RemoveFromFavoritesView.as_view(), name='remove-from-favorites'),
 
-    path('product/add-to-favorites/', AddToFavoritesView.as_view(), name='add-to-favorites'),
-    path('product/remove-from-favorites/', RemoveFromFavoritesView.as_view(), name='remove-from-favorites'),
+
+    path('user/<int:id>/cartitems/', CartItemCreateView.as_view(), name='cart-item-create'),
+    path('user/<int:id>/cartitems/<int:pk>/', CartItemDetailView.as_view(), name='cart-item-detail'),
+    path('user/<int:id>/add-to-cart/<int:pk>/', add_to_cart, name='add-to-cart'),
+    path('user/<int:id>/remove-from-cart/<int:pk>/', remove_from_cart, name='remove-from-cart'),
 
 
     #   !seller and user
