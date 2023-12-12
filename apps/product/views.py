@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from core import settings
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -21,10 +22,30 @@ from apps.api.serializers import  CartItemSerializer
 #     serializer_class = CartSerializer
 #     # permission_classes = [IsAuthenticated]
 
+
 class CartItemCreateView(generics.ListCreateAPIView):
     queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
-    # permission_classes = [IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+
+        # Customize the response format
+        formatted_data = []
+        for cart_item in serializer.data:
+            for characteristic in cart_item['characteristics']:
+                characteristic['image'] = self.get_characteristic_images(characteristic['id'])
+                formatted_data.append(characteristic)
+
+        return Response(formatted_data)
+
+    def get_characteristic_images(self, characteristic_id):
+        image_instances = CharacteristicImage.objects.filter(characteristic_id=characteristic_id)
+        image_urls = [settings.BASE_URL + image_instance.image.url for image_instance in image_instances]
+        return image_urls
+
+
 
 class CartItemDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CartItemSerializer
@@ -96,3 +117,8 @@ def remove_from_cart(request, id, pk):
 
     except CartItem.DoesNotExist:
         return Response({'error': 'Продукт не найден в корзине'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
