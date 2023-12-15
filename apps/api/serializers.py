@@ -177,6 +177,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         characteristics = []
         for characteristic in obj.productcharacteristic_set.all():
             characteristic_data = {
+                'id': characteristic.id,
                 'name': characteristic.name,
                 'value': characteristic.value,
                 'price': characteristic.price,
@@ -442,7 +443,7 @@ class CharacteristicSerializer(serializers.ModelSerializer):
                 #   , 'image'
                   ]
         
-        
+
 class CartItemSerializer(serializers.ModelSerializer):
     product_name = serializers.SerializerMethodField()
     characteristics = CharacteristicSerializer(many=True, read_only=True, required=False)
