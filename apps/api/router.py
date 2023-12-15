@@ -15,8 +15,9 @@ urlpatterns = [
     path('category/<int:pk>/', CategoryRetrieveUpdateDestroyView.as_view(), name='category-rud'),
 
     path('products/', ProductListCreateView.as_view(), name='product-list-create'),
-    path('characteristics/', ProductCharacteristicList.as_view(), name='product-characteristics-list'),
+    path('products/serach/', ProductListCreateView.as_view(), name='product-list-search'),
     path('product/<int:pk>/', ProductRetrieveUpdateDestroyView.as_view(), name='product-rud'),
+    path('characteristics/', ProductCharacteristicList.as_view(), name='product-characteristics-list'),
 
     path('product-images/', CharacteristicImageListCreateView.as_view(), name='chatacterstic-image-list-create'),
     path('chatacterstic-image/<int:pk>/', CharacteristicImageRetrieveUpdateDestroyView.as_view(), name='chatacterstic-image-rud'),

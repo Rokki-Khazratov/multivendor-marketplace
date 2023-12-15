@@ -41,7 +41,7 @@ class ProductListCreateView(ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = [filters.OrderingFilter] 
-    pagination_class = CustomPagination
+    # pagination_class = CustomPagination
 
     def get_queryset(self):
         queryset = Product.objects.all()
@@ -51,27 +51,15 @@ class ProductListCreateView(ListCreateAPIView):
         price_range = self.request.query_params.get('price')
         characteristic_value = self.request.query_params.get('characteristic')
 
-        try:
-            print("try")
-            if category_id:
-                print("category_id exists:", category_id)
-                # Convert category_id to an actual Category instance
-                category_id = int(category_id)
-                category = Category.objects.get(id=category_id)
-                queryset = queryset.filter(category=category)
-                print("Category filtered:", queryset)
-            else:
-                print("else")
-        except ValueError:
-            print("error")
-            return HttpResponseBadRequest("Invalid category_id. Must be an integer.")
-
 
         if name:
             queryset = queryset.filter(name__icontains=name)
 
         if seller:
             queryset = queryset.filter(seller=seller)
+    
+        if category_id:
+            queryset = queryset.filter(category=category_id)
 
 
         if price_range:

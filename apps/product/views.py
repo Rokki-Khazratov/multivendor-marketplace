@@ -31,7 +31,6 @@ class CartItemCreateView(generics.ListCreateAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
 
-        # Customize the response format
         formatted_data = []
         for cart_item in serializer.data:
             for characteristic in cart_item['characteristics']:
@@ -61,7 +60,7 @@ class CartItemDetailView(generics.RetrieveUpdateDestroyAPIView):
 # path('user/<int:id>/remove-from-cart/<int:pk>/', remove_from_cart, name='remove-from-cart'),
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def add_to_cart(request, id, pk):
     quantity = request.data.get('quantity', 1)
 
@@ -82,15 +81,12 @@ def add_to_cart(request, id, pk):
 
     user_profile = get_object_or_404(UserProfile, id=id)
     cart_item, created = CartItem.objects.get_or_create(user_profile=user_profile, product=product)
-    cart_item.characteristic_quantities.create(characteristic=characteristic, quantity=quantity)
-
-    characteristic.quantity -= quantity
-    characteristic.save()
+    cart_item.characteristics.add(characteristic)
 
     return Response({'message': 'Продукт успешно добавлен в корзину'}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def remove_from_cart(request, id, pk):
     try:
         user_profile = get_object_or_404(UserProfile, id=id)
@@ -101,12 +97,12 @@ def remove_from_cart(request, id, pk):
         if cart_item.quantity < 0:
             cart_item.quantity = 0
 
-        product_characteristic_quantities = cart_item.characteristic_quantities.all()
-        if product_characteristic_quantities:
-            characteristic_quantity = product_characteristic_quantities.first()
-            characteristic_quantity.quantity += 1
-            characteristic_quantity.save()
-            cart_item.characteristic_quantities.remove(characteristic_quantity)
+        product_characteristics = cart_item.characteristics.all()
+        if product_characteristics:
+            characteristic = product_characteristics.first()
+            characteristic_quantity = characteristic.characteristicquantity_set.first()
+            if characteristic_quantity:
+                cart_item.characteristics.remove(characteristic)
 
         cart_item.save()
 
@@ -117,8 +113,3 @@ def remove_from_cart(request, id, pk):
 
     except CartItem.DoesNotExist:
         return Response({'error': 'Продукт не найден в корзине'}, status=status.HTTP_404_NOT_FOUND)
-
-
-
-
-
