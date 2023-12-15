@@ -441,14 +441,21 @@ class CharacteristicSerializer(serializers.ModelSerializer):
         fields = ['id','name', 'value', 'price', 'discount_price'
                 #   , 'image'
                   ]
-
-
+        
+        
 class CartItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.SerializerMethodField()
     characteristics = CharacteristicSerializer(many=True, read_only=True, required=False)
 
     class Meta:
         model = CartItem
-        fields = ['id', 'quantity', 'product', 'characteristics']
+        fields = ['id', 'quantity', 'product_name', 'characteristics']
+
+    def get_product_name(self, obj):
+        return obj.product.name if obj.product else None
+
+
+
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

@@ -32,9 +32,13 @@ class CartItemCreateView(generics.ListCreateAPIView):
         serializer = self.get_serializer(queryset, many=True)
 
         formatted_data = []
+
         for cart_item in serializer.data:
-            for characteristic in cart_item['characteristics']:
+            product_name = cart_item.pop('product_name', '')  # Remove product_name from the cart_item dict
+            characteristics = cart_item.pop('characteristics', [])  # Remove characteristics from the cart_item dict
+            for characteristic in characteristics:
                 characteristic['image'] = self.get_characteristic_images(characteristic['id'])
+                characteristic['product_name'] = product_name
                 formatted_data.append(characteristic)
 
         return Response(formatted_data)
@@ -43,6 +47,7 @@ class CartItemCreateView(generics.ListCreateAPIView):
         image_instances = CharacteristicImage.objects.filter(characteristic_id=characteristic_id)
         image_urls = [settings.BASE_URL + image_instance.image.url for image_instance in image_instances]
         return image_urls
+
 
 
 
