@@ -26,14 +26,6 @@ from apps.api.serializers import  CartItemSerializer,CharacteristicQuantitySeria
 
 from django.db.models import F, Sum
 
-
-
-
-
-
-
-from django.db.models import F, Sum
-
 class CartItemCreateView(generics.ListCreateAPIView):
     serializer_class = CartItemSerializer
 

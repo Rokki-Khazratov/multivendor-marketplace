@@ -162,69 +162,74 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 
+class CharacteristicImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CharacteristicImage
+        fields = ['image']
+
+    def get_image(self, obj):
+        return settings.BASE_URL + obj.image.url
+
+    
+class CharacteristicSerializer(serializers.ModelSerializer):
+    images = CharacteristicImageSerializer(many=True, read_only=True)
+    characteristic_id = serializers.CharField(source='id')
+
+    class Meta:
+        model = ProductCharacteristic
+        fields = ['characteristic_id', 'images']
 
 class ProductDetailSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    is_published = serializers.BooleanField()
+    updated_at = serializers.DateTimeField()
+    seller = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
     characteristics = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
+    discount_price = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
-    reviews = ReviewSerializer(many=True)
-    seller_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = ['id', 'name', 'is_published', 'updated_at', 'seller', 'category', 'characteristics', 'price', 'discount_price', 'rating']
+
+    def get_seller(self, obj):
+        seller = obj.seller
+        return {'id': seller.id, 'store_name': seller.store_name, 'premium_tariff': seller.premium_tariff}
+
+    def get_category(self, obj):
+        category = obj.category
+        return {'id': category.id, 'name': category.name, 'parent': category.parent.name if category.parent else None}
 
     def get_characteristics(self, obj):
         characteristics = []
         for characteristic in obj.productcharacteristic_set.all():
             characteristic_data = {
-                'id': characteristic.id,
-                'name': characteristic.name,
-                'value': characteristic.value,
-                'price': characteristic.price,
-                'discount_price': characteristic.discount_price,
-                # 'images': self.get_resized_images(characteristic.characteristicimage_set.all()),
-                'images': self.get_resized_images(characteristic.characteristic_images.all())
-
+                'characteristic_id': characteristic.id,
+                'image': self.get_original_image(characteristic.characteristic_images.first())
             }
             characteristics.append(characteristic_data)
         return characteristics
 
+    def get_original_image(self, image_instance):
+        if image_instance:
+            original_url = settings.BASE_URL + image_instance.image.url
+            return {'original': original_url}
+        return {'original': None}
 
+    def get_price(self, obj):
+        # Extract price from the first characteristic for simplicity
+        first_characteristic = obj.productcharacteristic_set.first()
+        return first_characteristic.price if first_characteristic else None
 
-    def get_resized_images(self, images):
-        resized_images = []
-        for image in images:
-            original_url = settings.BASE_URL + image.image.url
-
-            middle_image = self.resize_image(image.image, 2)
-            middle_url = self.save_resized_image(image, middle_image)
-
-            low_image = self.resize_image(image.image, 4)
-            low_url = self.save_resized_image(image, low_image)
-
-            resized_images.append({
-                'original': original_url,
-                'middle': middle_url,
-                'low': low_url
-            })
-
-        return resized_images
-
-    def resize_image(self, original_image, factor):
-        pil_image = Image.open(original_image.path)
-
-        resized_image = pil_image.resize(
-            (pil_image.width // factor, pil_image.height // factor)
-        )
-
-        output_io = BytesIO()
-        resized_image.save(output_io, format='PNG')
-        output_io.seek(0)
-        return output_io
-
-    def save_resized_image(self, image_instance, resized_io):
-        image_instance.image.save(f'resized_{image_instance.image.name}', ContentFile(resized_io.read()), save=False)
-        return settings.BASE_URL + image_instance.image.url
+    def get_discount_price(self, obj):
+        # Extract discount_price from the first characteristic for simplicity
+        first_characteristic = obj.productcharacteristic_set.first()
+        return first_characteristic.discount_price if first_characteristic else None
 
     def get_rating(self, obj):
         if obj.reviews.exists():
@@ -232,19 +237,6 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             return round(average_rating, 1)
         else:
             return None
-
-    def get_seller_name(self,obj):
-        return obj.display_seller_name
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -434,14 +426,14 @@ class CharacteristicImageSerializer(serializers.ModelSerializer):
         fields = ['image']
 
 
-class CharacteristicSerializer(serializers.ModelSerializer):
-    # image = CharacteristicImageSerializer(source='images.first', read_only=True)
+# class CharacteristicSerializer(serializers.ModelSerializer):
+#     # image = CharacteristicImageSerializer(source='images.first', read_only=True)
 
-    class Meta:
-        model = ProductCharacteristic
-        fields = ['id','name', 'value', 'price', 'discount_price'
-                #   , 'image'
-                  ]
+#     class Meta:
+#         model = ProductCharacteristic
+#         fields = ['id','name', 'value', 'price', 'discount_price'
+#                 #   , 'image'
+#                   ]
         
 
 # class CartItemSerializer(serializers.ModelSerializer):
