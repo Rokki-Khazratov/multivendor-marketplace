@@ -1,7 +1,7 @@
 from django.forms import ImageField
 from core import settings
 from rest_framework import serializers
-from apps.product.models import CartItem, Category, ParentCategory,Product,ProductCharacteristic, CharacteristicImage
+from apps.product.models import CartItem, Category, CharacteristicQuantity, ParentCategory,Product,ProductCharacteristic, CharacteristicImage
 from apps.seller.models import Seller,SellerApplication
 from .models import DocumentationSection
 from apps.user.models import Favorites, Review, ReviewImage
@@ -444,9 +444,27 @@ class CharacteristicSerializer(serializers.ModelSerializer):
                   ]
         
 
+# class CartItemSerializer(serializers.ModelSerializer):
+#     product_name = serializers.SerializerMethodField()
+#     characteristics = CharacteristicSerializer(many=True, read_only=True, required=False)
+
+#     class Meta:
+#         model = CartItem
+#         fields = ['id', 'quantity', 'product_name', 'characteristics']
+
+#     def get_product_name(self, obj):
+#         return obj.product.name if obj.product else None
+
+
+
+class CharacteristicQuantitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CharacteristicQuantity
+        fields = ['id', 'characteristic', 'quantity']
+
 class CartItemSerializer(serializers.ModelSerializer):
     product_name = serializers.SerializerMethodField()
-    characteristics = CharacteristicSerializer(many=True, read_only=True, required=False)
+    characteristics = CharacteristicQuantitySerializer(many=True, read_only=True, required=False)
 
     class Meta:
         model = CartItem
@@ -454,6 +472,7 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     def get_product_name(self, obj):
         return obj.product.name if obj.product else None
+
 
 
 

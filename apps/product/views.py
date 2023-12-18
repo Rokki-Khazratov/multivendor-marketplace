@@ -9,7 +9,7 @@ from rest_framework import generics
 from apps.product.models import CartItem, ProductCharacteristic
 from .models import *
 from .models import  CartItem
-from apps.api.serializers import  CartItemSerializer
+from apps.api.serializers import  CartItemSerializer,CharacteristicQuantitySerializer
 
 
 # class CartListCreateView(generics.ListCreateAPIView):
@@ -23,30 +23,50 @@ from apps.api.serializers import  CartItemSerializer
 #     # permission_classes = [IsAuthenticated]
 
 
+
+from django.db.models import F, Sum
+
+
+
+
+
+
+
+from django.db.models import F, Sum
+
 class CartItemCreateView(generics.ListCreateAPIView):
-    queryset = CartItem.objects.all()
     serializer_class = CartItemSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs['id']
+        return CartItem.objects.filter(user_profile__id=user_id)
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
+        annotated_queryset = queryset.annotate(
+            name=F('product__productcharacteristic__name'),
+            value=F('product__productcharacteristic__value'),
+            price=F('product__productcharacteristic__price'),
+            discount_price=F('product__productcharacteristic__discount_price'),
+            image=F('product__productcharacteristic__characteristic_images__image'),
+            parent_product_id=F('product__id'),  # Corrected: use 'product__id'
+            product_name=F('product__name'),
+        ).values('id', 'name', 'value', 'price', 'discount_price', 'image', 'parent_product_id', 'product_name').annotate(
+            quantity=Sum('quantity')
+        )
 
-        formatted_data = []
+        formatted_data = list(annotated_queryset)
 
-        for cart_item in serializer.data:
-            product_name = cart_item.pop('product_name', '')  # Remove product_name from the cart_item dict
-            characteristics = cart_item.pop('characteristics', [])  # Remove characteristics from the cart_item dict
-            for characteristic in characteristics:
-                characteristic['image'] = self.get_characteristic_images(characteristic['id'])
-                characteristic['product_name'] = product_name
-                formatted_data.append(characteristic)
+        # Update image URLs with settings.BASE_URL
+        for item in formatted_data:
+            if item['image']:
+                item['image'] = settings.BASE_URL + 'storage/' + item['image']
+
+        print(f"Formatted Data: {formatted_data}")
 
         return Response(formatted_data)
 
-    def get_characteristic_images(self, characteristic_id):
-        image_instances = CharacteristicImage.objects.filter(characteristic_id=characteristic_id)
-        image_urls = [settings.BASE_URL + image_instance.image.url for image_instance in image_instances]
-        return image_urls
+
 
 
 
