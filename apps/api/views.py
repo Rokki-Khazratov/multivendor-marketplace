@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.filters import OrderingFilter
 from apps.product.models import ProductCharacteristic
 from django.db.models import F, Sum
 from django.db.models import OuterRef, Subquery
@@ -114,7 +115,7 @@ class ProductCharacteristicList(ListCreateAPIView):
 
 class ParentCategoryListCreateView(ListCreateAPIView):
     serializer_class = ParentCategorySerializer
-    filter_backends = [filters.OrderingFilter]
+    filter_backends = [OrderingFilter]
 
     def get_queryset(self):
         queryset = ParentCategory.objects.all()
@@ -126,6 +127,8 @@ class ParentCategoryListCreateView(ListCreateAPIView):
 class ParentCategoryRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = ParentCategory.objects.all()
     serializer_class = ParentCategorySerializer
+
+    
 
 
 

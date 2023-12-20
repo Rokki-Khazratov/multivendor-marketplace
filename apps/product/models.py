@@ -20,20 +20,20 @@ def characteristic_image_path(instance, filename):
 
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
 
 class ParentCategory(models.Model):
     name = models.CharField(max_length=255)
+    categories = models.ManyToManyField(Category)
 
     def __str__(self):
         return self.name
 
 
-class Category(models.Model):
-    name = models.CharField(max_length=255)
-    parent = models.ForeignKey(ParentCategory, null=True, blank=True,on_delete=models.DO_NOTHING)
-
-    def __str__(self):
-        return self.name
 
 
 

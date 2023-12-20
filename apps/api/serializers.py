@@ -269,15 +269,20 @@ class FavoritesSerializer(serializers.ModelSerializer):
         fields = ['user', 'favorite_products']
 
 
-class ParentCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ParentCategory
-        fields = '__all__'
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['id', 'name']
+
+class ParentCategorySerializer(serializers.ModelSerializer):
+    categories = CategorySerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ParentCategory
+        fields = ['id', 'name', 'categories']
+
+
 
 class SellerSerializer(serializers.ModelSerializer):
     # def map_premium_tariff(self, obj):
