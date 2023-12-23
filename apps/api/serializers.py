@@ -124,7 +124,7 @@ class ProductSerializer(serializers.ModelSerializer):
         return {
             "id": category.id,
             "name": category.name,
-            "parent": category.parent.name,
+            # "parent": category.parent.name,
         }
 
 
