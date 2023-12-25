@@ -181,6 +181,22 @@ class CharacteristicSerializer(serializers.ModelSerializer):
         model = ProductCharacteristic
         fields = ['characteristic_id', 'images']
 
+        
+class CharacteristicDetailSerializer(serializers.ModelSerializer):
+    name = serializers.CharField()
+    value = serializers.CharField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    discount_price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductCharacteristic
+        fields = ['characteristic_id', 'name', 'value', 'price', 'discount_price', 'image']
+
+    def get_image(self, obj):
+        return settings.BASE_URL + obj.images.first().image.url if obj.images.exists() else None
+
+
 class ProductDetailSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
@@ -188,14 +204,18 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     updated_at = serializers.DateTimeField()
     seller = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
-    characteristics = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
     discount_price = serializers.SerializerMethodField()
     rating = serializers.SerializerMethodField()
 
+    characteristics = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
         fields = ['id', 'name', 'is_published', 'updated_at', 'seller', 'category', 'characteristics', 'price', 'discount_price', 'rating']
+
+    # ... (rest of the serializer remains the same)
+
 
     def get_seller(self, obj):
         seller = obj.seller
@@ -203,23 +223,53 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
     def get_category(self, obj):
         category = obj.category
-        return {'id': category.id, 'name': category.name, 'parent': category.parent.name if category.parent else None}
+        return {'id': category.id, 'name': category.name, 
+                # 'parent': category.parent.name if category.parent else None
+                }
 
     def get_characteristics(self, obj):
         characteristics = []
         for characteristic in obj.productcharacteristic_set.all():
             characteristic_data = {
                 'characteristic_id': characteristic.id,
-                'image': self.get_original_image(characteristic.characteristic_images.first())
+                'name': characteristic.name,
+                'value': characteristic.value,
+                'image': self.get_resized_images(characteristic.characteristic_images.first())
             }
             characteristics.append(characteristic_data)
         return characteristics
-
-    def get_original_image(self, image_instance):
+    
+    def get_resized_images(self, image_instance):
         if image_instance:
             original_url = settings.BASE_URL + image_instance.image.url
-            return {'original': original_url}
-        return {'original': None}
+            original_image = {'original': original_url}
+            
+            # Add other resolutions
+            middle_url = self.get_resized_image_url(image_instance.image, 'middle')
+            low_url = self.get_resized_image_url(image_instance.image, 'low')
+            
+            original_image['middle'] = middle_url
+            original_image['low'] = low_url
+            
+            return original_image
+        return {'original': None, 'middle': None, 'low': None}
+
+    def get_resized_image_url(self, image_field, size_suffix):
+        # Define your sizes based on your requirements
+        sizes = {'middle': (300, 300), 'low': (100, 100)}
+        
+        # Open the original image
+        img = Image.open(image_field.path)
+        
+        # Resize the image
+        img.thumbnail(sizes[size_suffix], Image.ANTIALIAS)
+        
+        # Save the resized image with a new name
+        resized_path = f"{image_field.path.replace('.png', f'_{size_suffix}.png')}"
+        img.save(resized_path)
+        
+        # Return the URL of the resized image
+        return settings.BASE_URL + '/storage/'+resized_path.replace(settings.MEDIA_ROOT, '')
 
     def get_price(self, obj):
         # Extract price from the first characteristic for simplicity
