@@ -1,3 +1,4 @@
+import os
 from django.forms import ImageField
 from core import settings
 from rest_framework import serializers
@@ -15,8 +16,6 @@ from io import BytesIO
 from django.core.files.base import ContentFile  
 
 from rest_framework import serializers
-from PIL import Image
-import os
 
 # class ReviewSerializer(serializers.ModelSerializer):
 #     user = serializers.SerializerMethodField()
@@ -205,6 +204,11 @@ class ProductSerializer(serializers.ModelSerializer):
                 # 'low': low_url
             }
         return {'original': None, 'middle': None, 'low': None}
+    
+
+
+
+
 
     def get_rating(self, obj):
         if obj.reviews.exists():
@@ -256,6 +260,8 @@ class CharacteristicDetailSerializer(serializers.ModelSerializer):
         return settings.BASE_URL + obj.images.first().image.url if obj.images.exists() else None
 
 
+
+
 class ProductDetailSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
@@ -263,22 +269,56 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     updated_at = serializers.DateTimeField()
     seller = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
-    price = serializers.SerializerMethodField()
-    discount_price = serializers.SerializerMethodField()
-    rating = serializers.SerializerMethodField()
+    total_rating = serializers.SerializerMethodField()
 
     characteristics = serializers.SerializerMethodField()
+    reviews = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'is_published', 'updated_at', 'seller', 'category', 'characteristics', 'price', 'discount_price', 'rating']
+        fields = ['id', 'name', 'is_published', 'updated_at', 'seller', 'category', 'characteristics', 'reviews','total_rating']
 
-    # ... (rest of the serializer remains the same)
 
 
     def get_seller(self, obj):
         seller = obj.seller
         return {'id': seller.id, 'store_name': seller.store_name, 'premium_tariff': seller.premium_tariff}
+    
+    def get_reviews(self, obj):
+        reviews_data = self.get_reviews_data(obj.reviews.all())
+        return reviews_data
+
+    def get_review_images(self, images):
+        return [
+            {
+                'original': settings.BASE_URL + image.image.url,
+                'middle': self.get_resized_image_url(image, 'middle'),
+                'low': self.get_resized_image_url(image, 'low'),
+            }
+            for image in images
+        ]
+
+    def get_reviews_data(self, product_reviews):
+        reviews_data = []
+        for review in product_reviews.all():
+            review_data = {
+                'review_id': review.id,
+                'rating': review.rating,
+                'info': review.info,
+                'images': self.get_review_images(review.images.all()),  # Assuming Review has an 'images' field
+            }
+            reviews_data.append(review_data)
+        return reviews_data
+
+
+
+    def get_total_rating(self, obj):
+        if obj.reviews.exists():
+            average_rating = obj.reviews.aggregate(Avg('rating'))['rating__avg']
+            return round(average_rating, 1)
+        else:
+            return None
 
     def get_category(self, obj):
         category = obj.category
@@ -298,6 +338,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             'characteristic_id': characteristic.id,
             'name': characteristic.name,
             'value': characteristic.value,
+            'price': characteristic.price,
+            'discount_price': characteristic.discount_price,
             'image': self.get_image_data(characteristic.characteristic_images.first())
         }
 
@@ -342,25 +384,6 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
         return None
 
-
-
-
-    def get_price(self, obj):
-        # Extract price from the first characteristic for simplicity
-        first_characteristic = obj.productcharacteristic_set.first()
-        return first_characteristic.price if first_characteristic else None
-
-    def get_discount_price(self, obj):
-        # Extract discount_price from the first characteristic for simplicity
-        first_characteristic = obj.productcharacteristic_set.first()
-        return first_characteristic.discount_price if first_characteristic else None
-
-    def get_rating(self, obj):
-        if obj.reviews.exists():
-            average_rating = obj.reviews.aggregate(Avg('rating'))['rating__avg']
-            return round(average_rating, 1)
-        else:
-            return None
 
 
 
@@ -598,7 +621,6 @@ class CartItemSerializer(serializers.ModelSerializer):
 
 
 
-
 class UserProfileSerializer(serializers.ModelSerializer):
     user_profile = UserSerializer(source='user')
     cart_items = CartItemSerializer(many=True, read_only=True)
@@ -614,12 +636,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
             if cart_item_id:
                 try:
                     cart_item_obj = CartItem.objects.get(id=cart_item_id)
-                    characteristics = cart_item_obj.characteristics.all()
-                    if characteristics:
-                        cart_item['characteristics'] = CharacteristicSerializer(characteristics, many=True).data
+                    # Check if 'characteristics' attribute exists before accessing it
+                    if hasattr(cart_item_obj, 'characteristics'):
+                        characteristics = cart_item_obj.characteristics.all()
+                        if characteristics:
+                            cart_item['characteristics'] = CharacteristicSerializer(characteristics, many=True).data
                 except CartItem.DoesNotExist:
                     pass
         return ret
+
 
 
 
