@@ -1,4 +1,5 @@
 from django.http import HttpResponseBadRequest
+from apps.product.serializers import ProductCharacteristicSerializer, ProductDetailSerializer, ProductSerializer
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView,ListAPIView
 from rest_framework import filters
 from rest_framework import status

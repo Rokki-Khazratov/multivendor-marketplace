@@ -1,3 +1,4 @@
+# app name - prouct
 from django.db import models
 from apps.seller.models import Seller
 from django.contrib.auth.models import User
