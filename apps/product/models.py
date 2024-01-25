@@ -81,7 +81,7 @@ class ProductCharacteristic(models.Model):
     images = models.ManyToManyField('CharacteristicImage', related_name='product_characteristics', blank=True)
 
     def __str__(self):
-        return f"{self.name}: {self.value}"
+        return f"{self.name}"
 
 
 class CharacteristicImage(models.Model):
@@ -90,46 +90,13 @@ class CharacteristicImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.characteristic.name}"
-
-
-
-
-
-
-
-
-
-
-
-
-
-# class CharacteristicQuantity(models.Model):
-#     cart_item = models.ForeignKey('CartItem', on_delete=models.CASCADE)
-#     characteristic = models.ForeignKey(ProductCharacteristic, on_delete=models.CASCADE)
-#     quantity = models.PositiveIntegerField(default=0)
-
-#     def __str__(self):
-#         return f"{self.cart_item} - {self.characteristic.name} : {self.quantity}"
-
-
-
-
-
-
-
-# class CartItem(models.Model):
-#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='cart_items')
-#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-#     quantity = models.PositiveIntegerField(default=1)
-#     characteristics = models.ManyToManyField(ProductCharacteristic, through='CharacteristicQuantity')
-
-#     def __str__(self):
-#         return f"Cart Item for Cart {self.user_profile.id}"   
+   
 
 class CartItem(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='cart_items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
+    quantity = models.PositiveIntegerField(default=0)
+    characteristics = models.ManyToManyField(ProductCharacteristic, through='CharacteristicQuantity')
 
     def __str__(self):
         return f"Cart Item for Cart {self.user_profile.id}"

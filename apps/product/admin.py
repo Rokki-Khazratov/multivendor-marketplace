@@ -9,6 +9,7 @@ class CharacteristicQuantityAdmin(admin.TabularInline):
     extra = 1 
 
 class CartItemAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user_profile', 'product', 'quantity']
     inlines = [CharacteristicQuantityAdmin]
 admin.site.register(CartItem, CartItemAdmin)
 

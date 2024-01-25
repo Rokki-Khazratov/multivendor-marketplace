@@ -10,21 +10,25 @@ from apps.product.models import CartItem, ProductCharacteristic
 from .models import *
 from .models import  CartItem
 from apps.api.serializers import  CartItemSerializer,CharacteristicQuantitySerializer
-
-
-# class CartListCreateView(generics.ListCreateAPIView):
-#     queryset = Cart.objects.all()
-#     serializer_class = CartSerializer
-#     # permission_classes = [IsAuthenticated]
-
-# class CartDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     queryset = Cart.objects.all()
-#     serializer_class = CartSerializer
-#     # permission_classes = [IsAuthenticated]
+from django.db.models import F, Sum
 
 
 
 from django.db.models import F, Sum
+
+class CartItemDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = CartItemSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs['id']
+        return CartItem.objects.filter(cart__user__id=user_id)
+
+
+
+
+
+
+from django.db.models import F
 
 class CartItemCreateView(generics.ListCreateAPIView):
     serializer_class = CartItemSerializer
@@ -35,15 +39,18 @@ class CartItemCreateView(generics.ListCreateAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        annotated_queryset = queryset.annotate(
-            name=F('product__productcharacteristic__name'),
-            value=F('product__productcharacteristic__value'),
-            price=F('product__productcharacteristic__price'),
-            discount_price=F('product__productcharacteristic__discount_price'),
-            image=F('product__productcharacteristic__characteristic_images__image'),
-            parent_product_id=F('product__id'),  # Corrected: use 'product__id'
-            product_name=F('product__name'),
-        ).values('id', 'name', 'value', 'price', 'discount_price', 'image', 'parent_product_id', 'product_name').annotate(
+
+        annotated_queryset = CartItem.objects.filter(
+            id__in=queryset.values_list('id', flat=True)
+        ).annotate(
+            cart_item_name=F('characteristics__name'),
+            cart_item_value=F('characteristics__value'),
+            cart_item_price=F('characteristics__price'),
+            cart_item_discount_price=F('characteristics__discount_price'),
+            cart_item_image=F('characteristics__characteristic_images__image'),
+            cart_item_parent_product_id=F('product__id'),
+            cart_item_product_name=F('product__name')
+        ).values('id', 'cart_item_name', 'cart_item_value', 'cart_item_price', 'cart_item_discount_price', 'cart_item_image', 'cart_item_parent_product_id', 'cart_item_product_name').annotate(
             quantity=Sum('quantity')
         )
 
@@ -51,56 +58,48 @@ class CartItemCreateView(generics.ListCreateAPIView):
 
         # Update image URLs with settings.BASE_URL
         for item in formatted_data:
-            if item['image']:
-                item['image'] = settings.BASE_URL + 'storage/' + item['image']
+            if item['cart_item_image']:
+                item['cart_item_image'] = settings.BASE_URL + 'storage/' + item['cart_item_image']
 
         print(f"Formatted Data: {formatted_data}")
 
         return Response(formatted_data)
 
-
-
-
-
-
-class CartItemDetailView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = CartItemSerializer
-
-    def get_queryset(self):
-        user_id = self.kwargs['id']
-        return CartItem.objects.filter(cart__user__id=user_id)
-    # permission_classes = [IsAuthenticated]
-
-
-# Assuming your URL configurations look like this:
-# path('user/<int:id>/add-to-cart/<int:pk>/', add_to_cart, name='add-to-cart'),
-# path('user/<int:id>/remove-from-cart/<int:pk>/', remove_from_cart, name='remove-from-cart'),
-
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
 def add_to_cart(request, id, pk):
-    quantity = request.data.get('quantity', 1)
+    quantities = request.data.get('quantity', 1)
+    characteristic_ids = request.data.get('characteristic_id', [])
 
     try:
         product = Product.objects.get(pk=pk)
     except Product.DoesNotExist:
         return Response({'error': 'Продукт не найден'}, status=status.HTTP_404_NOT_FOUND)
 
-    characteristic_id = request.data.get('characteristic_id')
-
-    try:
-        characteristic = ProductCharacteristic.objects.get(pk=characteristic_id)
-    except ProductCharacteristic.DoesNotExist:
-        return Response({'error': 'Характеристика не найдена'}, status=status.HTTP_404_NOT_FOUND)
-
-    if characteristic.quantity < quantity:
-        return Response({'error': f'Недостаточное количество на складе для характеристики: {characteristic.name}'}, status=status.HTTP_400_BAD_REQUEST)
+    # Проверка, что все указанные характеристики существуют и принадлежат выбранному продукту
+    characteristics = ProductCharacteristic.objects.filter(pk__in=characteristic_ids, product=product)
+    if characteristics.count() != len(characteristic_ids):
+        return Response({'error': 'Одна или несколько характеристик не найдены у выбранного продукта'}, status=status.HTTP_404_NOT_FOUND)
 
     user_profile = get_object_or_404(UserProfile, id=id)
-    cart_item, created = CartItem.objects.get_or_create(user_profile=user_profile, product=product)
-    cart_item.characteristics.add(characteristic)
+
+    for characteristic in characteristics:
+        if characteristic.quantity < int(quantities):
+            return Response({'error': f'Недостаточное количество на складе для характеристики: {characteristic.name}'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Создание или обновление CartItem для каждой характеристики
+        cart_item, created = CartItem.objects.get_or_create(user_profile=user_profile, product=product)
+        cart_item.quantity = int(quantities)
+        cart_item.save()
+
+        # Очистка старых характеристик и добавление новых
+        cart_item.characteristics.clear()
+        cart_item.characteristics.add(*characteristics)
 
     return Response({'message': 'Продукт успешно добавлен в корзину'}, status=status.HTTP_200_OK)
+
+
+
+
 
 @api_view(['POST'])
 # @permission_classes([IsAuthenticated])

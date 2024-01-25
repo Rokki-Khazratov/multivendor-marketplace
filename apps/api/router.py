@@ -22,9 +22,6 @@ urlpatterns = [
     path('product-images/', CharacteristicImageListCreateView.as_view(), name='chatacterstic-image-list-create'),
     path('chatacterstic-image/<int:pk>/', CharacteristicImageRetrieveUpdateDestroyView.as_view(), name='chatacterstic-image-rud'),
 
-    path('product/<int:pk>/add-to-cart/', add_to_cart, name='add-to-cart'),
-    path('product/<int:pk>/remove-from-cart/', remove_from_cart, name='remove-from-cart'),
-
     path('reviews/', ReviewListCreateView.as_view(), name='review-list-create'),
     path('reviews/<int:pk>/', ReviewRetrieveUpdateDestroyView.as_view(), name='review-detail'),
 

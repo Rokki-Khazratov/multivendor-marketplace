@@ -95,6 +95,32 @@ class ProductSerializer(serializers.ModelSerializer):
 
         return None
 
+
+# def get_resized_image_url(self, image_instance, resolution):
+#     if image_instance:
+#         original_path = image_instance.image.path
+
+#         if resolution == 'middle':
+#             size = (400, 400)  
+#         elif resolution == 'low':
+#             size = (200, 200)  
+#         else:
+#             size = original_path.size
+
+
+#         resized_image = Image.open(original_path).resize(size)
+
+#         output_buffer = BytesIO()
+#         resized_image.save(output_buffer, format='PNG')
+
+#         image_instance.image.save(resolution, output_buffer, save=False)
+
+#         resized_url = settings.BASE_URL + image_instance.image.url.replace('original', resolution)
+
+#         return resized_url
+
+#     return None
+
     def get_characteristic_images(self, images):
         return [
             {
@@ -274,7 +300,10 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             characteristic_data['images'] = self.get_characteristic_images(characteristic.characteristic_images.all())
             characteristics.append(characteristic_data)
         return characteristics
-
+    
+    def get_resized_image_url(self, image_instance, resolution):
+        print(f"Resolution: {resolution}")
+    
     def get_characteristic_data(self, characteristic):
         return {
             'characteristic_id': characteristic.id,
@@ -291,18 +320,22 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
     def get_resized_image_url(self, image_instance, resolution):
         if image_instance:
-            original_image = Image.open(image_instance.image.path)
+            original_path = image_instance.image.path
 
             if resolution == 'middle':
-                size = (200, 200)  
+                size = (400, 400)  
             elif resolution == 'low':
-                size = (100, 100)  
+                size = (200, 200)  
             else:
-                size = original_image.size
-            resized_image = original_image.resize(size)
+                size = original_path.size
+
+
+            resized_image = Image.open(original_path).resize(size)
 
             output_buffer = BytesIO()
             resized_image.save(output_buffer, format='PNG')
+
+            image_instance.image.save(resolution, output_buffer, save=False)
 
             resized_url = settings.BASE_URL + image_instance.image.url.replace('original', resolution)
 
@@ -310,3 +343,4 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
         return None
 
+    

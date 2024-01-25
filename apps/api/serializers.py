@@ -163,15 +163,16 @@ class CharacteristicQuantitySerializer(serializers.ModelSerializer):
         fields = ['id', 'characteristic', 'quantity']
 
 class CartItemSerializer(serializers.ModelSerializer):
-    product_name = serializers.SerializerMethodField()
+    cart_item_product_name = serializers.SerializerMethodField()
     characteristics = CharacteristicQuantitySerializer(many=True, read_only=True, required=False)
 
     class Meta:
         model = CartItem
-        fields = ['id', 'quantity', 'product_name', 'characteristics']
+        fields = ['id', 'quantity', 'cart_item_product_name', 'characteristics']
 
-    def get_product_name(self, obj):
+    def get_cart_item_product_name(self, obj):
         return obj.product.name if obj.product else None
+
 
 
 
