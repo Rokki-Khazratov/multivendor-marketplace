@@ -81,7 +81,7 @@ class ProductCharacteristic(models.Model):
     images = models.ManyToManyField('CharacteristicImage', related_name='product_characteristics', blank=True)
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name} - {self.value}"
 
 
 class CharacteristicImage(models.Model):

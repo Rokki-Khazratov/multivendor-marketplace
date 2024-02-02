@@ -1,14 +1,15 @@
 # admin.py
 from django.contrib import admin
-from .models import Order, OrderItem, OrderHistory, OneClickOrder, OneClickOrderItem
+from .models import Order, OrderItem, OrderHistory
+# from .models import OneClickOrder, OneClickOrderItem
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 1
 
-class OneClickOrderItemInline(admin.TabularInline):
-    model = OneClickOrderItem
-    extra = 1
+# class OneClickOrderItemInline(admin.TabularInline):
+#     model = OneClickOrderItem
+#     extra = 1
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -26,12 +27,6 @@ class OrderHistoryAdmin(admin.ModelAdmin):
         return obj.orders.count()
     orders_count.short_description = 'Number of Orders'
 
-@admin.register(OneClickOrder)
-class OneClickOrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'full_name', 'created_at', 'status')
-    list_filter = ('status',)
-    search_fields = ('full_name', 'email', 'phone_number')
-    inlines = [OneClickOrderItemInline]
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
@@ -45,3 +40,10 @@ class OrderItemAdmin(admin.ModelAdmin):
     def get_inline_instances(self, request, obj=None):
         return []
 
+
+# @admin.register(OneClickOrder)
+# class OneClickOrderAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'full_name', 'created_at', 'status')
+#     list_filter = ('status',)
+#     search_fields = ('full_name', 'email', 'phone_number')
+#     inlines = [OneClickOrderItemInline]
