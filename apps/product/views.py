@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from apps.product.serializers import ProductPostSerializer, ProductSerializer
 from core import settings
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -129,3 +130,27 @@ def remove_from_cart(request, id, pk):
 
     except CartItem.DoesNotExist:
         return Response({'error': 'Продукт не найден в корзине'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+class ProductCreateView(generics.CreateAPIView):
+    serializer_class = ProductPostSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Добавьте логику для сохранения изображений перед вызовом super().create()
+        self.save_images(serializer)
+
+        # Сохраните объект и получите ответ
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def save_images(self, serializer):
+        for characteristic_data in serializer.validated_data.get('characteristics', []):
+            for image_data in characteristic_data.get('images', []):
+                image_instance = image_data.get('image')
+                image_instance.save()

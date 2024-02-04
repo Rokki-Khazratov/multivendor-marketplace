@@ -32,7 +32,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ['category',]
     search_fields = ['name', 'category__name']
     # exclude = ['handle']
-    prepopulated_fields = {'handle': ('name',)}
+    # prepopulated_fields = {'handle': ('name',)}
     list_per_page = 20
     
     def get_queryset(self, request):

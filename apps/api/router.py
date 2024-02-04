@@ -5,6 +5,7 @@ from apps.api.views import *
 from apps.seller.views import *
 from apps.user.views import *
 from apps.product.views import *
+from apps.order.views import *
 
 urlpatterns = [
     #   ! product 
@@ -38,6 +39,11 @@ urlpatterns = [
     path('user/<int:id>/add-to-cart/<int:pk>/', add_to_cart, name='add-to-cart'),
     path('user/<int:id>/remove-from-cart/<int:pk>/', remove_from_cart, name='remove-from-cart'),
 
+    path('orders/', OrderListCreateView.as_view(), name='order-list-create'),
+    path('orders/<int:pk>/', OrderRetrieveUpdateDestroyView.as_view(), name='order-retrieve-update-destroy'),
+    path('order-history/', OrderHistoryListCreateView.as_view(), name='order-history-list-create'),
+    path('order-history/<int:pk>/', OrderHistoryRetrieveUpdateDestroyView.as_view(), name='order-history-retrieve-update-destroy'),
+
 
     #   !seller and user
     path('sellers/', SellerListCreateView.as_view(), name='sellers-list-create'),
@@ -60,5 +66,9 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
 
     path('docs/', DocumentationSectionList.as_view(), name='documentation-api'),
+
+
+
+    path('product/add/', ProductCreateView.as_view(), name='add-product'),
 
 ]
